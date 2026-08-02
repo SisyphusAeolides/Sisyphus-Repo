@@ -6,6 +6,10 @@ on:
       - main
   workflow_dispatch:
 
+concurrency:
+  group: sisyphus-pacman-repo
+  cancel-in-progress: false
+
 jobs:
   build-packages:
     runs-on: ubuntu-latest
@@ -28,18 +32,24 @@ jobs:
       - name: Build PKGBUILDs
         run: |
           sudo -u builduser bash -c '
+            set -euo pipefail
             git config --global --add safe.directory "*"
             mkdir -p x86_64
             
-            for pkg in ccze-rs-git elan-guardian-git libinput-rs-git tuned-rs-git; do
+            for pkg in ccze-rs elan-guardian libinput-rs tuned-rs; do
               cd $pkg
-              makepkg -s --noconfirm
-              cp *.pkg.tar.zst ../x86_64/ || true
+              mapfile -t artifacts < <(makepkg --packagelist)
+              makepkg -s --noconfirm --cleanbuild --clean
+              for artifact in "${artifacts[@]}"; do
+                test -f "$artifact"
+                cp "$artifact" ../x86_64/
+              done
               cd ..
             done
             
             cd x86_64
-            repo-add sisyphus.db.tar.gz *.pkg.tar.zst
+            test -n "$(find . -maxdepth 1 -name "*.pkg.tar.zst" -print -quit)"
+            repo-add sisyphus.db.tar.gz ./*.pkg.tar.zst
           '
 
       - name: Upload Artifacts
@@ -47,6 +57,7 @@ jobs:
         with:
           name: pacman-repo
           path: x86_64/
+          if-no-files-found: error
 
   deploy-pages:
     needs: build-packages
@@ -61,11 +72,15 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: pacman-repo
-          path: x86_64
+          path: public/x86_64
+          merge-multiple: true
           
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./x86_64
+          publish_dir: ./public
           publish_branch: gh-pages
+          user_name: Sisyphus Aeolides
+          user_email: SisyphusAeolides@pm.me
+          commit_message: Publish Sisyphus pacman repository

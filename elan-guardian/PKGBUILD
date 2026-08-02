@@ -1,5 +1,5 @@
 # Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
-pkgname=elan-guardian-git
+pkgname=elan-guardian
 pkgver=0.2.6
 pkgrel=1
 pkgdesc="Evidence-driven diagnostics and recovery for Elantech I2C input controllers"
@@ -8,28 +8,23 @@ url="https://github.com/SisyphusAeolides/elan-guardian"
 license=('GPL2')
 depends=('gcc-libs' 'glibc' 'systemd-libs')
 makedepends=('cargo' 'git' 'gcc-fortran')
-provides=("${pkgname%-git}")
-conflicts=("${pkgname%-git}")
-source=("git+${url}.git")
+conflicts=('elan-guardian-git')
+replaces=('elan-guardian-git')
+source=("git+${url}.git#tag=v${pkgver}")
 sha256sums=('SKIP')
 
-pkgver() {
-  cd "${pkgname%-git}"
-  echo "$(grep '^version =' Cargo.toml | head -n1 | cut -d\" -f2).r$(git rev-list --count HEAD).g$(git rev-parse --short HEAD)"
-}
-
 build() {
-  cd "${pkgname%-git}"
+  cd "$pkgname"
   make all
 }
 
 package() {
-  cd "${pkgname%-git}"
+  cd "$pkgname"
   install -Dm0755 target/release/elan-guardian "$pkgdir/usr/bin/elan-guardian"
   install -Dm0755 target/release/elan-trace-score "$pkgdir/usr/bin/elan-trace-score"
   install -Dm0644 systemd/elan-guardian-resume.service "$pkgdir/usr/lib/systemd/system/elan-guardian-resume.service"
   install -Dm0644 systemd/elan-guardian-module.service "$pkgdir/usr/lib/systemd/system/elan-guardian-module.service"
   install -Dm0644 systemd/elan-guardian-watch.service "$pkgdir/usr/lib/systemd/system/elan-guardian-watch.service"
   install -Dm0644 packaging/elan-guardian.8 "$pkgdir/usr/share/man/man8/elan-guardian.8"
-  install -Dm0644 LICENSE "$pkgdir/usr/share/licenses/${pkgname%-git}/LICENSE"
+  install -Dm0644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }

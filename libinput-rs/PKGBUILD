@@ -1,30 +1,26 @@
 # Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
-pkgname=libinput-rs-git
+pkgname=libinput-rs
 pkgver=0.3.1
-pkgrel=3
+pkgrel=1
 pkgdesc="100% drop-in Rust replacement for the libinput 1.31.3 C ABI and tools"
 arch=('x86_64')
 url="https://github.com/SisyphusAeolides/libinput-rs"
 license=('MIT')
 depends=('glibc' 'gcc-libs' 'systemd-libs' 'python-libevdev' 'python-pyudev' 'python-yaml')
 makedepends=('cargo' 'git' 'gcc-fortran' 'meson' 'curl' 'patch' 'rpm-tools')
-provides=("${pkgname%-git}" "libinput")
-conflicts=("${pkgname%-git}" "libinput")
-source=("git+${url}.git")
+provides=('libinput')
+conflicts=('libinput' 'libinput-rs-git')
+replaces=('libinput' 'libinput-rs-git')
+source=("git+${url}.git#tag=v${pkgver}")
 sha256sums=('SKIP')
 
-pkgver() {
-  cd "${pkgname%-git}"
-  echo "$(grep '^version =' Cargo.toml | head -n1 | cut -d\" -f2).r$(git rev-list --count HEAD).g$(git rev-parse --short HEAD)"
-}
-
 build() {
-  cd "${pkgname%-git}"
+  cd "$pkgname"
   make all
 }
 
 package() {
-  cd "${pkgname%-git}"
+  cd "$pkgname"
   make DESTDIR="$pkgdir" PREFIX=/usr install
-  install -Dm0644 LICENSE "$pkgdir/usr/share/licenses/${pkgname%-git}/LICENSE"
+  install -Dm0644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }
