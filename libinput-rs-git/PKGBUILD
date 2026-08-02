@@ -1,15 +1,15 @@
 # Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
 pkgname=libinput-rs-git
 pkgver=0.3.1
-pkgrel=1
+pkgrel=2
 pkgdesc="100% drop-in Rust replacement for the libinput 1.31.3 C ABI and tools"
 arch=('x86_64')
 url="https://github.com/SisyphusAeolides/libinput-rs"
 license=('MIT')
 depends=('glibc' 'gcc-libs' 'systemd-libs' 'python-libevdev' 'python-pyudev' 'python-yaml')
 makedepends=('cargo' 'git' 'gcc-fortran' 'meson' 'curl' 'patch')
-provides=("${pkgname%-git}")
-conflicts=("${pkgname%-git}")
+provides=("${pkgname%-git}" "libinput")
+conflicts=("${pkgname%-git}" "libinput")
 source=("git+${url}.git")
 sha256sums=('SKIP')
 

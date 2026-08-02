@@ -1,7 +1,7 @@
 pkgbase = libinput-rs-git
 	pkgdesc = 100% drop-in Rust replacement for the libinput 1.31.3 C ABI and tools
 	pkgver = 0.3.1
-	pkgrel = 1
+	pkgrel = 2
 	url = https://github.com/SisyphusAeolides/libinput-rs
 	arch = x86_64
 	license = MIT
@@ -18,7 +18,9 @@ pkgbase = libinput-rs-git
 	depends = python-pyudev
 	depends = python-yaml
 	provides = libinput-rs
+	provides = libinput
 	conflicts = libinput-rs
+	conflicts = libinput
 	source = git+https://github.com/SisyphusAeolides/libinput-rs.git
 	sha256sums = SKIP
 
