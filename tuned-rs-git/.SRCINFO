@@ -11,7 +11,11 @@ pkgbase = tuned-rs-git
 	depends = gcc-libs
 	depends = systemd-libs
 	provides = tuned-rs
+	provides = power-profiles-daemon
+	provides = tuned
 	conflicts = tuned-rs
+	conflicts = power-profiles-daemon
+	conflicts = tuned
 	source = git+https://github.com/SisyphusAeolides/tuned-rs.git
 	sha256sums = SKIP
 
