@@ -1,7 +1,7 @@
 # Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
 pkgname=tuned-rs-git
 pkgver=0.2.6
-pkgrel=1
+pkgrel=2
 pkgdesc="High-performance Rust implementation of the TuneD system tuning daemon"
 arch=('x86_64')
 url="https://github.com/SisyphusAeolides/tuned-rs"
