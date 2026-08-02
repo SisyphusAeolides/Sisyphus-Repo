@@ -1,0 +1,30 @@
+# Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
+pkgname=ccze-rs-git
+pkgver=0.5.1
+pkgrel=1
+pkgdesc="Fast streaming log colorizer with native analytics and formally specified protocol verification"
+arch=('x86_64')
+url="https://github.com/SisyphusAeolides/ccze-rs"
+license=('MIT')
+depends=('gcc-libs' 'glibc')
+makedepends=('cargo' 'git' 'gcc-fortran')
+provides=("${pkgname%-git}")
+conflicts=("${pkgname%-git}")
+source=("git+${url}.git")
+sha256sums=('SKIP')
+
+pkgver() {
+  cd "${pkgname%-git}"
+  echo "$(grep '^version =' Cargo.toml | head -n1 | cut -d\" -f2).r$(git rev-list --count HEAD).g$(git rev-parse --short HEAD)"
+}
+
+build() {
+  cd "${pkgname%-git}"
+  make build
+}
+
+package() {
+  cd "${pkgname%-git}"
+  make DESTDIR="$pkgdir" PREFIX=/usr install
+  install -Dm0644 LICENSE "$pkgdir/usr/share/licenses/${pkgname%-git}/LICENSE"
+}

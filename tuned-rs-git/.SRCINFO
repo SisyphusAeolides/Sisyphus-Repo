@@ -1,0 +1,18 @@
+pkgbase = tuned-rs-git
+	pkgdesc = High-performance Rust implementation of the TuneD system tuning daemon
+	pkgver = 0.2.6
+	pkgrel = 1
+	url = https://github.com/SisyphusAeolides/tuned-rs
+	arch = x86_64
+	license = GPL2
+	makedepends = cargo
+	makedepends = git
+	depends = glibc
+	depends = gcc-libs
+	depends = systemd-libs
+	provides = tuned-rs
+	conflicts = tuned-rs
+	source = git+https://github.com/SisyphusAeolides/tuned-rs.git
+	sha256sums = SKIP
+
+pkgname = tuned-rs-git

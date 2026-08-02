@@ -1,0 +1,18 @@
+pkgbase = ccze-rs-git
+	pkgdesc = Fast streaming log colorizer with native analytics and formally specified protocol verification
+	pkgver = 0.5.1
+	pkgrel = 1
+	url = https://github.com/SisyphusAeolides/ccze-rs
+	arch = x86_64
+	license = MIT
+	makedepends = cargo
+	makedepends = git
+	makedepends = gcc-fortran
+	depends = gcc-libs
+	depends = glibc
+	provides = ccze-rs
+	conflicts = ccze-rs
+	source = git+https://github.com/SisyphusAeolides/ccze-rs.git
+	sha256sums = SKIP
+
+pkgname = ccze-rs-git

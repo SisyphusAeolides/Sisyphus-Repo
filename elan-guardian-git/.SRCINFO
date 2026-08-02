@@ -1,0 +1,19 @@
+pkgbase = elan-guardian-git
+	pkgdesc = Evidence-driven diagnostics and recovery for Elantech I2C input controllers
+	pkgver = 0.2.6
+	pkgrel = 1
+	url = https://github.com/SisyphusAeolides/elan-guardian
+	arch = x86_64
+	license = GPL2
+	makedepends = cargo
+	makedepends = git
+	makedepends = gcc-fortran
+	depends = gcc-libs
+	depends = glibc
+	depends = systemd-libs
+	provides = elan-guardian
+	conflicts = elan-guardian
+	source = git+https://github.com/SisyphusAeolides/elan-guardian.git
+	sha256sums = SKIP
+
+pkgname = elan-guardian-git
