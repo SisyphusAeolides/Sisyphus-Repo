@@ -1,7 +1,7 @@
 pkgbase = libinput-rs-git
 	pkgdesc = 100% drop-in Rust replacement for the libinput 1.31.3 C ABI and tools
 	pkgver = 0.3.1
-	pkgrel = 2
+	pkgrel = 3
 	url = https://github.com/SisyphusAeolides/libinput-rs
 	arch = x86_64
 	license = MIT
@@ -11,6 +11,7 @@ pkgbase = libinput-rs-git
 	makedepends = meson
 	makedepends = curl
 	makedepends = patch
+	makedepends = rpm-tools
 	depends = glibc
 	depends = gcc-libs
 	depends = systemd-libs
