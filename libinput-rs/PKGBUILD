@@ -1,7 +1,7 @@
 # Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
 pkgname=libinput-rs
 pkgver=0.3.1
-pkgrel=1
+pkgrel=2
 pkgdesc="100% drop-in Rust replacement for the libinput 1.31.3 C ABI and tools"
 arch=('x86_64')
 url="https://github.com/SisyphusAeolides/libinput-rs"
@@ -21,6 +21,6 @@ build() {
 
 package() {
   cd "$pkgname"
-  make DESTDIR="$pkgdir" PREFIX=/usr install
+  make DESTDIR="$pkgdir" PREFIX=/usr LIBDIR=/usr/lib install
   install -Dm0644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }
