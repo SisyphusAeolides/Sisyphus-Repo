@@ -1,0 +1,71 @@
+name: Build and Publish Pacman Repo
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build-packages:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup environment
+        run: |
+          pacman -Syu --noconfirm
+          # Install general dependencies we know we need
+          pacman -S --noconfirm sudo git gcc-fortran meson curl patch rust cargo
+          useradd -m builduser
+          echo 'builduser ALL=(ALL) NOPASSWD: ALL' > /etc/sudoers.d/builduser
+          chown -R builduser:builduser .
+
+      - name: Build PKGBUILDs
+        run: |
+          sudo -u builduser bash -c '
+            git config --global --add safe.directory "*"
+            mkdir -p x86_64
+            
+            for pkg in ccze-rs-git elan-guardian-git libinput-rs-git tuned-rs-git; do
+              cd $pkg
+              makepkg -s --noconfirm
+              cp *.pkg.tar.zst ../x86_64/ || true
+              cd ..
+            done
+            
+            cd x86_64
+            repo-add sisyphus.db.tar.gz *.pkg.tar.zst
+          '
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pacman-repo
+          path: x86_64/
+
+  deploy-pages:
+    needs: build-packages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: pacman-repo
+          path: x86_64
+          
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./x86_64
+          publish_branch: gh-pages
