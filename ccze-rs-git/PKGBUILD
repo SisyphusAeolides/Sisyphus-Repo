@@ -1,15 +1,16 @@
 # Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
 pkgname=ccze-rs-git
 pkgver=0.5.1
-pkgrel=1
+pkgrel=2
 pkgdesc="Fast streaming log colorizer with native analytics and formally specified protocol verification"
 arch=('x86_64')
 url="https://github.com/SisyphusAeolides/ccze-rs"
 license=('MIT')
 depends=('gcc-libs' 'glibc')
 makedepends=('cargo' 'git' 'gcc-fortran')
-provides=("${pkgname%-git}")
-conflicts=("${pkgname%-git}")
+provides=("${pkgname%-git}" "ccze")
+conflicts=("${pkgname%-git}" "ccze")
+options=(!lto)
 source=("git+${url}.git")
 sha256sums=('SKIP')
 
