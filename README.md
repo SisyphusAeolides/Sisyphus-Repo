@@ -12,16 +12,33 @@ Add the repository to `/etc/pacman.conf`:
 
 ```ini
 [sisyphus]
-SigLevel = Optional TrustAll
+SigLevel = Required DatabaseRequired
 Server = https://sisyphusaeolides.github.io/Sisyphus-Repo/$arch
 ```
 
-Then refresh the database and install packages normally:
+Install the repository key before refreshing the database. Check the
+fingerprint independently before adding or locally trusting the key:
 
 ```sh
+curl --fail --location --output sisyphus-repo.asc \
+  https://raw.githubusercontent.com/SisyphusAeolides/Sisyphus-Repo/main/keys/sisyphus-repo.asc
+gpg --show-keys --with-fingerprint --keyid-format long sisyphus-repo.asc
+# Expected primary fingerprint: 2A02745D8C2C03AE7F95BCEA8136EB9238213447
+sudo pacman-key --add sisyphus-repo.asc
+sudo pacman-key --lsign-key 2A02745D8C2C03AE7F95BCEA8136EB9238213447
 sudo pacman -Syy
 sudo pacman -S arach-hwd ccze-rs elan-guardian libinput-rs tuned-rs
 ```
+
+`SigLevel = Required DatabaseRequired` rejects unsigned packages and unsigned
+repository databases. Do not change it to `Optional` or `TrustAll`.
+
+Each published repository state also has a signed, immutable package snapshot
+at `https://sisyphusaeolides.github.io/Sisyphus-Repo/snapshots/<commit-sha>/`.
+It retains the exact package archives, detached signatures, database, and
+signed checksum manifest. The manifest records its source commit, workflow
+run, timestamp, and SHA-256 checksums. The publishing workflow refuses to
+replace an existing snapshot.
 
 The packages replace their corresponding `-git` names. `ccze-rs` replaces
 `ccze`, `libinput-rs` replaces `libinput`, and `tuned-rs` replaces `tuned`
