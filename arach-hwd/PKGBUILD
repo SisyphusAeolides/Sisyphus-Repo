@@ -1,0 +1,25 @@
+# Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
+pkgname=arach-hwd
+pkgver=0.1.0
+pkgrel=1
+pkgdesc="Signed hardware detection and provisioning planner for ArachOS"
+arch=('x86_64')
+url="https://github.com/SisyphusAeolides/Arach-HWD"
+license=('MIT')
+depends=('gcc-libs' 'glibc')
+makedepends=('cargo' 'git')
+source=("git+${url}.git#tag=v${pkgver}")
+sha256sums=('SKIP')
+
+build() {
+  cd "$pkgname"
+  cargo build --locked --release
+}
+
+package() {
+  cd "$pkgname"
+  for binary in arach-hwd arach-hwd-catalog-sync arach-hwd-qualify arach-hwd-record; do
+    install -Dm0755 "target/release/$binary" "$pkgdir/usr/bin/$binary"
+  done
+  install -Dm0644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

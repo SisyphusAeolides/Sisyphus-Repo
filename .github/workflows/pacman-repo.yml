@@ -36,7 +36,7 @@ jobs:
             git config --global --add safe.directory "*"
             mkdir -p x86_64
             
-            for pkg in ccze-rs elan-guardian libinput-rs tuned-rs; do
+            for pkg in arach-hwd ccze-rs elan-guardian libinput-rs tuned-rs; do
               cd $pkg
               mapfile -t artifacts < <(makepkg --packagelist)
               makepkg -s --noconfirm --cleanbuild --clean

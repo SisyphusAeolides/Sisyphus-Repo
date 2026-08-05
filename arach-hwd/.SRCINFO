@@ -1,0 +1,15 @@
+pkgbase = arach-hwd
+	pkgdesc = Signed hardware detection and provisioning planner for ArachOS
+	pkgver = 0.1.0
+	pkgrel = 1
+	url = https://github.com/SisyphusAeolides/Arach-HWD
+	arch = x86_64
+	license = MIT
+	makedepends = cargo
+	makedepends = git
+	depends = gcc-libs
+	depends = glibc
+	source = git+https://github.com/SisyphusAeolides/Arach-HWD.git#tag=v0.1.0
+	sha256sums = SKIP
+
+pkgname = arach-hwd

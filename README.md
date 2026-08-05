@@ -3,6 +3,7 @@
 This repository publishes x86_64 packages for:
 
 - `ccze-rs`
+- `arach-hwd`
 - `elan-guardian`
 - `libinput-rs`
 - `tuned-rs`
@@ -19,7 +20,7 @@ Then refresh the database and install packages normally:
 
 ```sh
 sudo pacman -Syy
-sudo pacman -S ccze-rs elan-guardian libinput-rs tuned-rs
+sudo pacman -S arach-hwd ccze-rs elan-guardian libinput-rs tuned-rs
 ```
 
 The packages replace their corresponding `-git` names. `ccze-rs` replaces
