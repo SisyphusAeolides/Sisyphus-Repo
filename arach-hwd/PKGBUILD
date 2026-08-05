@@ -12,12 +12,12 @@ source=("git+${url}.git#tag=v${pkgver}")
 sha256sums=('SKIP')
 
 build() {
-  cd "$pkgname"
+  cd "Arach-HWD"
   cargo build --locked --release
 }
 
 package() {
-  cd "$pkgname"
+  cd "Arach-HWD"
   for binary in arach-hwd arach-hwd-catalog-sync arach-hwd-qualify arach-hwd-record; do
     install -Dm0755 "target/release/$binary" "$pkgdir/usr/bin/$binary"
   done
