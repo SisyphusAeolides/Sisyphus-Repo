@@ -1,0 +1,4 @@
+# makepkg source-cache directories
+*/src/
+*/pkg/
+*/Arach-HWD/

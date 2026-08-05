@@ -1,8 +1,0 @@
-# pack-refs with: peeled fully-peeled sorted 
-9bf30a8986394d3e1881d860d31680baa46203d8 refs/heads/main
-5b784b761d40bbc2f168a19655900881aad489f3 refs/heads/readme-current-status
-569c40a530fb8e5fe9fc618b97c7ae4a5795f634 refs/heads/remote-catalog
-6b9e35d11bb5d8f39a4ae4dc902c3753c7d07655 refs/pull/1/head
-02502ce752a434d47c602f11a977656fa952f32a refs/pull/2/head
-f0aab8810629e0be83d93b80befb9fa1cb983461 refs/tags/v0.1.0
-^9bf30a8986394d3e1881d860d31680baa46203d8
