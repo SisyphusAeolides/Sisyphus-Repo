@@ -29,6 +29,7 @@ jobs:
           # Install general dependencies we know we need
           pacman -S --noconfirm git gcc-fortran meson curl patch rust cargo gnupg pacman-contrib rpm-tools
           useradd -m builduser
+          echo "builduser ALL=(ALL) NOPASSWD: /usr/bin/pacman" >> /etc/sudoers
           chown -R builduser:builduser .
 
       - name: Import release signing authority
