@@ -1,6 +1,6 @@
 # Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
 pkgname=tuned-rs
-pkgver=0.2.6
+pkgver=0.2.7
 pkgrel=1
 pkgdesc="High-performance Rust implementation of the TuneD system tuning daemon"
 arch=('x86_64')
@@ -11,7 +11,7 @@ makedepends=('cargo' 'git')
 provides=('power-profiles-daemon' 'tuned')
 conflicts=('power-profiles-daemon' 'tuned' 'tuned-rs-git')
 replaces=('power-profiles-daemon' 'tuned' 'tuned-rs-git')
-source=("git+${url}.git#commit=28fbe93")
+source=("git+${url}.git#tag=v${pkgver}")
 sha256sums=('SKIP')
 
 build() {

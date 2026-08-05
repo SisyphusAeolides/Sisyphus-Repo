@@ -1,6 +1,6 @@
 # Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
 pkgname=elan-guardian
-pkgver=0.2.7
+pkgver=0.2.8
 pkgrel=1
 pkgdesc="Evidence-driven diagnostics and recovery for Elantech I2C input controllers"
 arch=('x86_64')
