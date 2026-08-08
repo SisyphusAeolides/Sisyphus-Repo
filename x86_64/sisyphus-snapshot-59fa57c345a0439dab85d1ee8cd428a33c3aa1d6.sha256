@@ -1,0 +1,26 @@
+source_commit=59fa57c345a0439dab85d1ee8cd428a33c3aa1d6
+workflow_run=31275123202
+workflow_attempt=1
+created_at=2026-08-08T19:49:34+00:00
+724dc7bbee9b574bd9b7113f7238ee48ab09d99fa32461ef1c85ab57a401769c  ./arach-hwd-0.1.0-1-x86_64.pkg.tar.zst
+99f69a443c3d3894a5c85cc47f84449f4fb6aca34d439447402a0c0d90521dce  ./arach-hwd-debug-0.1.0-1-x86_64.pkg.tar.zst
+ba00da8c20d36dbf4583e9b44b043ac8117f183da0846a8d16c5eed791e0084b  ./ccze-rs-0.5.2-1-x86_64.pkg.tar.zst
+d3f4677932b2d480883bb50a8f137acea2e429710fb39ae7a83af353c86f3a31  ./ccze-rs-debug-0.5.2-1-x86_64.pkg.tar.zst
+bf2ab00a5def4312ea36aa2c21d044a05e81660e62fabcf65f2e6bf512920965  ./elan-guardian-0.2.8-1-x86_64.pkg.tar.zst
+6c85d5078670c7a19213e3d96fe0c0ab297a1819aa6903c65a1fd5cb34f5968b  ./elan-guardian-debug-0.2.8-1-x86_64.pkg.tar.zst
+7e98c3f250639196061bd6ddb08c3f726d9d39ee1c0a038564dd9befc8139692  ./libinput-rs-0.3.3-1-x86_64.pkg.tar.zst
+58c4a76ad70bd7abe3461651bb0391faaffd7b0efddebbf90af1eea1545cc112  ./libinput-rs-debug-0.3.3-1-x86_64.pkg.tar.zst
+2b4f9313ec56eb906d46dc13151bed7de0db16eb1f508f30194d044d62a090f1  ./tuned-rs-0.2.9-1-x86_64.pkg.tar.zst
+4ac70d9f787dd8ce33fdb36c554b0f5bec74c0d007ab2b7a238a18b4740fb6c1  ./tuned-rs-debug-0.2.9-1-x86_64.pkg.tar.zst
+8c0393a702ce8c27c1b8c6c4fa2d4c74f2e7da8e24a2e1d7db69af2e2ecf3321  ./arach-hwd-0.1.0-1-x86_64.pkg.tar.zst.sig
+14476553a992ccc874cced31d2725b710b14687014dc8ec626cf4150782f5f0f  ./arach-hwd-debug-0.1.0-1-x86_64.pkg.tar.zst.sig
+1661a5a779d210833ac93025f3e0a90673ff0c6ebd4418a49e0a8034c7556867  ./ccze-rs-0.5.2-1-x86_64.pkg.tar.zst.sig
+35c175c52c60bc113793d91d3962ab9da284e3740f8cf32aa98338b133d5606a  ./ccze-rs-debug-0.5.2-1-x86_64.pkg.tar.zst.sig
+5bc940e8351f5782bc3243999bea8c786c81194d7bf9dcf0d464f164f9656d7a  ./elan-guardian-0.2.8-1-x86_64.pkg.tar.zst.sig
+437752ece6d4c5cd926520edda9a4e3d276d5423cee043a4a2dbf2e65c205441  ./elan-guardian-debug-0.2.8-1-x86_64.pkg.tar.zst.sig
+1f5cb2a26a088196246bec50580e720c68561bb8162745f36639f3450670afc6  ./libinput-rs-0.3.3-1-x86_64.pkg.tar.zst.sig
+f1d2b6b0698d8958189e97a7611ccde84cc7ccf51a829f011ac655d109e4e88a  ./libinput-rs-debug-0.3.3-1-x86_64.pkg.tar.zst.sig
+ca5cb851432f3c22f710da6e45e9acab24e728a553671558fc2b58220382dd51  ./tuned-rs-0.2.9-1-x86_64.pkg.tar.zst.sig
+2e63218a44c8c4824a7b53d10ae5926bf69e8416ae85edd600750b143db47e8a  ./tuned-rs-debug-0.2.9-1-x86_64.pkg.tar.zst.sig
+5df472875203e7e87a1d2aeccb1dd297e328025ba37a6c8183be00a8d2874dc1  sisyphus.db.tar.gz
+6fed701281e19bbe3ef1e6e5877cafdd0b41ee73d52f4570c314c5e35b657db0  sisyphus.db.tar.gz.sig
