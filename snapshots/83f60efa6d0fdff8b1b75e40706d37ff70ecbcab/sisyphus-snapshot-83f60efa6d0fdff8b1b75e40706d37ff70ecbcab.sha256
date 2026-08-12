@@ -1,0 +1,26 @@
+source_commit=83f60efa6d0fdff8b1b75e40706d37ff70ecbcab
+workflow_run=31591274029
+workflow_attempt=1
+created_at=2026-08-12T11:25:40+00:00
+7d710dc85a5450152171efc5cd0049e3ae8aa133056acb12e63ffe6e3fc871a7  ./ccze-rs-0.5.4-1-x86_64.pkg.tar.zst
+1a033a0c313f37b2d76158d8a36753b2cd4f9b371f01838154ff9263aba74d4b  ./ccze-rs-debug-0.5.4-1-x86_64.pkg.tar.zst
+8ae4bf1350b3ca7b3b806d8cd74840e6e01408b7af2e03dbaaca6acd4775f08b  ./elan-guardian-0.2.15-1-x86_64.pkg.tar.zst
+925339a2514715e8e46241ee6ee2ca853a79a47beac6b3576b820a4a6c189c19  ./elan-guardian-debug-0.2.15-1-x86_64.pkg.tar.zst
+a4c91763bf90c874a78f43ecc6c7f3134da65d8bfdeb0e176076b4160c2dfda4  ./libinput-rs-0.3.11-1-x86_64.pkg.tar.zst
+a99b80d1b8a85a8640de66f7dbae6f2653a3aa656e2abbfdf9a5f4cb5e70c233  ./libinput-rs-debug-0.3.11-1-x86_64.pkg.tar.zst
+784af44ae7119ca4dd865801fff243cb3cf0177e3b91649456bb13b205c19b24  ./systemd-resolved-rs-0.2.1-1-x86_64.pkg.tar.zst
+5db18f7098410c3ca483befb33922930a6dabf98760a48b73ce98c514d9ece30  ./systemd-resolved-rs-debug-0.2.1-1-x86_64.pkg.tar.zst
+2c703f8757a57bb367625098c353ac46a6a96cd0e11195dae2a8ae114c5f222c  ./tuned-rs-0.2.10-1-x86_64.pkg.tar.zst
+8eec97015ee04ee57c8ed57506f5390fdb7d64abd44bab19354c26bc537968f3  ./tuned-rs-debug-0.2.10-1-x86_64.pkg.tar.zst
+4c96daaa57a47bd0caa7aa9bc3f7e495b95a4206b58821e54ab0f421e4f1c5db  ./ccze-rs-0.5.4-1-x86_64.pkg.tar.zst.sig
+5f9aa07dc94822830d7a08f461c18663694435de0eb0fb9f7427068b7792afa4  ./ccze-rs-debug-0.5.4-1-x86_64.pkg.tar.zst.sig
+7988eabb4a9e60cd0c183815e5a6cfe9ed8e27c0d1a6e568f461a9cbe4ac9890  ./elan-guardian-0.2.15-1-x86_64.pkg.tar.zst.sig
+62237cac911bceee15808c11923f05ce528883eb0481aee5721e76bc26c03c0b  ./elan-guardian-debug-0.2.15-1-x86_64.pkg.tar.zst.sig
+48d29c9e7f0813d9316d5d4f45bfd49847335a9b68006e1f6ace65e73057f7fd  ./libinput-rs-0.3.11-1-x86_64.pkg.tar.zst.sig
+23066310085d5a58ab692577fb6520466b983fdcaae22e07a478653e0c3c76bf  ./libinput-rs-debug-0.3.11-1-x86_64.pkg.tar.zst.sig
+5353f63b7d16d7b7606e9a59b8da0ff11aa01cc4730d208bf9c7daabcf535af5  ./systemd-resolved-rs-0.2.1-1-x86_64.pkg.tar.zst.sig
+999c407be79c3593e90c175f082bdc71a67a0419166df048a6baaaf4b20ff096  ./systemd-resolved-rs-debug-0.2.1-1-x86_64.pkg.tar.zst.sig
+0c1bdd5bb7aba6f7ec87451fc5a59c1a7c7391dbfbf014cba768466d3917ac49  ./tuned-rs-0.2.10-1-x86_64.pkg.tar.zst.sig
+9c17643fc253e04f61f6caafe3b4e59a5bd466cf6d24b503e38c2bef354ef642  ./tuned-rs-debug-0.2.10-1-x86_64.pkg.tar.zst.sig
+fb38cb6260625fb82d4179bb9eb6782a9e5b3cecb4002b17f538a25a68871749  sisyphus.db.tar.gz
+582e02fe3a6b392379e52cdafd4202cd1a7977695d3c4a3f97a685fdccfc16c2  sisyphus.db.tar.gz.sig
