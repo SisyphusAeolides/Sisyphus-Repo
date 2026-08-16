@@ -1,17 +1,18 @@
 # Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
 pkgname=rustd
-pkgver=0.1.1
-pkgrel=2
-# Exact signed SHA certified for side-by-side CachyOS alternate-boot.
-_commit=661f8acc8e2dd67ac8e4933affb28174ba860cdc
-pkgdesc="RustD init and service manager (side-by-side certification build)"
+pkgver=0.1.2
+pkgrel=1
+# Exact signed SHA promoted for exclusive CachyOS replacement.
+_commit=2946b501aac222576e294d8289b55c7e7ba38b96
+pkgdesc="RustD init and service manager (exclusive systemd replacement)"
 arch=('x86_64')
 url="https://github.com/SisyphusAeolides/rustd"
 license=('LGPL-2.1-or-later')
-depends=('glibc' 'gcc-libs' 'openssl' 'libcap' 'libseccomp' 'pam' 'dbus' 'audit' 'libxcrypt' 'pcre2')
-makedepends=('cargo' 'git' 'gcc-fortran')
-# Certification packages must coexist with stock systemd for offline rollback.
-conflicts=('rustd-git')
+depends=('glibc' 'gcc-libs' 'openssl' 'libcap' 'libseccomp' 'pam' 'dbus' 'audit' 'libxcrypt' 'pcre2' 'systemd-libs')
+makedepends=('cargo' 'git' 'gcc-fortran' 'dbus' 'pam')
+provides=('systemd' 'udev' 'systemd-tools')
+conflicts=('systemd' 'rustd-git')
+replaces=('systemd')
 install=rustd.install
 source=("git+${url}.git#commit=${_commit}"
         "rustd-boot-entry.conf"
@@ -24,7 +25,7 @@ sha256sums=('SKIP'
 
 build() {
   cd "$pkgname"
-  make build
+  make build pam-module
 }
 
 check() {
@@ -37,7 +38,12 @@ package() {
   cd "$pkgname"
   make DESTDIR="$pkgdir" PREFIX=/usr install
 
-  # Boot integration: separate RustD entry with init=/usr/lib/rustd/rustd.
+  # Pacman hooks and third-party packages still invoke systemctl(1).
+  ln -sf rustctl "$pkgdir/usr/bin/systemctl"
+  ln -sf rustctl "$pkgdir/usr/bin/journalctl"
+  ln -sf rustudevadm "$pkgdir/usr/bin/udevadm"
+
+  # Exclusive boot integration: rewrite the primary boot entry to RustD PID1.
   install -Dm644 "$srcdir/rustd-boot-entry.conf" \
     "$pkgdir/usr/lib/rustd/boot/rustd-boot-entry.conf"
   install -Dm755 "$srcdir/rustd-configure-boot" \
@@ -45,7 +51,6 @@ package() {
   install -Dm644 "$srcdir/90-rustd-boot.hook" \
     "$pkgdir/usr/share/libalpm/hooks/90-rustd-boot.hook"
 
-  # Ownership markers used by package verification.
-  install -Dm644 /dev/null "$pkgdir/usr/lib/rustd/.side-by-side-certification"
   printf '%s\n' "$_commit" >"$pkgdir/usr/lib/rustd/CERTIFIED_COMMIT"
+  install -Dm644 /dev/null "$pkgdir/usr/lib/rustd/.exclusive-replacement"
 }

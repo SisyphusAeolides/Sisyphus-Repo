@@ -1,7 +1,7 @@
 pkgbase = rustd
-	pkgdesc = RustD init and service manager (side-by-side certification build)
-	pkgver = 0.1.1
-	pkgrel = 2
+	pkgdesc = RustD init and service manager (exclusive systemd replacement)
+	pkgver = 0.1.2
+	pkgrel = 1
 	url = https://github.com/SisyphusAeolides/rustd
 	install = rustd.install
 	arch = x86_64
@@ -9,6 +9,8 @@ pkgbase = rustd
 	makedepends = cargo
 	makedepends = git
 	makedepends = gcc-fortran
+	makedepends = dbus
+	makedepends = pam
 	depends = glibc
 	depends = gcc-libs
 	depends = openssl
@@ -19,8 +21,14 @@ pkgbase = rustd
 	depends = audit
 	depends = libxcrypt
 	depends = pcre2
+	depends = systemd-libs
+	provides = systemd
+	provides = udev
+	provides = systemd-tools
+	conflicts = systemd
 	conflicts = rustd-git
-	source = git+https://github.com/SisyphusAeolides/rustd.git#commit=661f8acc8e2dd67ac8e4933affb28174ba860cdc
+	replaces = systemd
+	source = git+https://github.com/SisyphusAeolides/rustd.git#commit=2946b501aac222576e294d8289b55c7e7ba38b96
 	source = rustd-boot-entry.conf
 	source = 90-rustd-boot.hook
 	source = rustd-configure-boot

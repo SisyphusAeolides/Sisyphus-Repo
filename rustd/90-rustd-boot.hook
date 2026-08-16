@@ -5,7 +5,7 @@ Type = Package
 Target = rustd
 
 [Action]
-Description = Configure RustD side-by-side boot entry
+Description = Configure exclusive RustD boot entry
 When = PostTransaction
 Exec = /usr/lib/rustd/boot/rustd-configure-boot
 NeedsTargets

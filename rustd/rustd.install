@@ -1,7 +1,20 @@
 post_install() {
-  echo "==> RustD certification package installed side-by-side with systemd."
-  echo "    Boot the 'RustD (certification)' entry to run init=/usr/lib/rustd/rustd."
-  echo "    Offline rollback: select the stock systemd boot entry."
+  echo "==> RustD exclusive replacement installed (conflicts with systemd)."
+  echo "    Primary boot entry will use init=/usr/lib/rustd/rustd."
+  echo "    Keep a CachyOS rescue USB until the first graphical boot succeeds."
+
+  # Prefer classic mkinitcpio udev hooks once systemd is gone.
+  if [[ -f /etc/mkinitcpio.conf ]]; then
+    if grep -Eq 'HOOKS=.*\bsystemd\b' /etc/mkinitcpio.conf; then
+      sed -i -E \
+        -e 's/\bsystemd\b/udev/' \
+        -e 's/\bsd-vconsole\b/vconsole/' \
+        -e 's/\bsd-encrypt\b/encrypt/' \
+        /etc/mkinitcpio.conf || true
+      echo "==> Updated /etc/mkinitcpio.conf: systemd hooks -> udev/vconsole/encrypt"
+    fi
+  fi
+
   /usr/lib/rustd/boot/rustd-configure-boot || true
 }
 
@@ -10,7 +23,6 @@ post_upgrade() {
 }
 
 pre_remove() {
-  rm -f /boot/loader/entries/rustd-certification.conf \
-        /boot/loader/entries/.rustd-systemd-rollback \
-        /etc/grub.d/09_rustd_certification 2>/dev/null || true
+  echo "==> Removing RustD exclusive replacement."
+  echo "    Restore a stock CachyOS/systemd image before rebooting without RustD."
 }

@@ -1,6 +1,8 @@
 post_install() {
-  echo "==> rustd-resolved certification package installed under /usr/lib/rustd."
-  echo "    It does not replace systemd-resolved during certification."
+  echo "==> rustd-resolved owns host DNS (NSS + stub resolv.conf)."
+  if [[ -f /etc/nsswitch.conf ]] && ! grep -Eq '\bresolve\b' /etc/nsswitch.conf; then
+    echo "    Add 'resolve [!UNAVAIL=return]' ahead of 'dns' in /etc/nsswitch.conf hosts: lines."
+  fi
 }
 
 post_upgrade() {
