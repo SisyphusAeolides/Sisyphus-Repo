@@ -1,8 +1,8 @@
 # Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
 pkgname=rustd
 pkgver=0.1.0
-pkgrel=4
-_commit=c9b08503ea52bbe1a67956a7e15196f4078419aa
+pkgrel=5
+_commit=1cdf8c7c0ca73e7c66f3dcb3b0e490f8bdeb0a5e
 pkgdesc="Compatibility-oriented reimplementation of systemd"
 arch=('x86_64')
 url="https://github.com/SisyphusAeolides/rustd"
