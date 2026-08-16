@@ -31,6 +31,7 @@ check() {
 package() {
   cd "$pkgname"
   make DESTDIR="$pkgdir" PREFIX=/usr install
+  install -d "$pkgdir/usr/lib/rustd/resolved"
   printf '%s\n' "$_commit" >"$pkgdir/usr/lib/rustd/resolved/CERTIFIED_COMMIT"
   install -Dm644 /dev/null "$pkgdir/usr/lib/rustd/resolved/.exclusive-replacement"
 }
