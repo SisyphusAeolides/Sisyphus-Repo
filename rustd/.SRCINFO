@@ -28,7 +28,7 @@ pkgbase = rustd
 	conflicts = systemd
 	conflicts = rustd-git
 	replaces = systemd
-	source = git+https://github.com/SisyphusAeolides/rustd.git#commit=bdd84f732a452a8361d66e43bab4547830b05648
+	source = git+https://github.com/SisyphusAeolides/rustd.git#commit=19d4e17603711807cb8bce873adeb47beca4a873
 	source = rustd-boot-entry.conf
 	source = 90-rustd-boot.hook
 	source = rustd-configure-boot
