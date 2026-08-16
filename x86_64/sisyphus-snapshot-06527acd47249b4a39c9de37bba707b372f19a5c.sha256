@@ -1,0 +1,30 @@
+source_commit=06527acd47249b4a39c9de37bba707b372f19a5c
+workflow_run=31949007668
+workflow_attempt=1
+created_at=2026-08-16T13:35:58+00:00
+c3b7a09e780b79fcfeb9ff7967675ee5226b6b88827908dbb62be0ea74f1fbc8  ./ccze-rs-0.5.4-2-x86_64.pkg.tar.zst
+818c9b36812c1188b662e3452bcdb7efee0880459a49f365dfb399e5b9ca8670  ./ccze-rs-debug-0.5.4-2-x86_64.pkg.tar.zst
+99d7589d8b9b1cd04a971b640a17bf6a6f2905897bec88a67f1edc9619d4e174  ./elan-guardian-0.2.15-2-x86_64.pkg.tar.zst
+06c0c119e0d574c4587fb61f1e4864ef8d3f271ec8690e4018165a7a62f523bf  ./elan-guardian-debug-0.2.15-2-x86_64.pkg.tar.zst
+acf3b3d4bb50a314441bee4f13f1cc1510d28ef96638e243eacccc8ecfc9b164  ./libinput-rs-0.3.11-2-x86_64.pkg.tar.zst
+4eb3056def4aa0203075d536c7b9933b7cbda5a523466b549bb80988e824aa5a  ./libinput-rs-debug-0.3.11-2-x86_64.pkg.tar.zst
+961607f2aed15b1e0cdba26a6acbad3ee4c7e00b635ca923426357058a842c8a  ./rustd-0.1.0-4-x86_64.pkg.tar.zst
+5bd53e16319f6a9e59ad9ff448323e874020cb2f66f441d08a9fe915ac5c40cd  ./rustd-debug-0.1.0-4-x86_64.pkg.tar.zst
+72d208c4061b683e9411281c98a492d915a36d955418ccfdf907c9a2740a98d1  ./rustd-resolved-0.2.1-5-x86_64.pkg.tar.zst
+836e71fe60b185556ea7c258fe1c8b7aab6e8128cee064e0dffbf62194a64a2f  ./rustd-resolved-debug-0.2.1-5-x86_64.pkg.tar.zst
+9c691414ed29f7606ca8d387fb92ff8ea17c2287a8c0c89815eac040ec4775e7  ./tuned-rs-0.2.10-2-x86_64.pkg.tar.zst
+256a0152b0ba9d51af9fe00e3b5cd430994446dd59029098ab76ec08aa075720  ./tuned-rs-debug-0.2.10-2-x86_64.pkg.tar.zst
+91bdf071406d195a24d70ab6258a3089dabe1a26d50dfcdae76bf63497d341b5  ./ccze-rs-0.5.4-2-x86_64.pkg.tar.zst.sig
+a6bdd1e339ecfc1faa1841106b6e22d9816fe9349250c1aaa592636e718a123b  ./ccze-rs-debug-0.5.4-2-x86_64.pkg.tar.zst.sig
+8b3c1d782d0e8b4c944f0969e5bee0b56f32f556200ee825487a37eea3ef84f0  ./elan-guardian-0.2.15-2-x86_64.pkg.tar.zst.sig
+9fde5b7a89df52b04c433837c6fedd3aa853eca15aabca52ab165c1039159988  ./elan-guardian-debug-0.2.15-2-x86_64.pkg.tar.zst.sig
+d20728eb8d9e84a848dd0ff79d2c65dccfa70bd3a0cf1cc1dd5cdb556303432d  ./libinput-rs-0.3.11-2-x86_64.pkg.tar.zst.sig
+34cfb08df51ef0eab1840986d769648fabcc63a26c9f18d55765a04e5a507433  ./libinput-rs-debug-0.3.11-2-x86_64.pkg.tar.zst.sig
+36caf435b8930b1a1a1619ba1439a8e09f27d80c98e68a151a3e01f938f11b5e  ./rustd-0.1.0-4-x86_64.pkg.tar.zst.sig
+4f3c3b63cbecd48248c7453e289b9036600966da5a8dfdb7c6e9fa80fe435a45  ./rustd-debug-0.1.0-4-x86_64.pkg.tar.zst.sig
+b4aae4de0fd55d79bb83bb8fa8b88b562ebee4a300f5b21bec9548e91cb12dc5  ./rustd-resolved-0.2.1-5-x86_64.pkg.tar.zst.sig
+281628fb7199a28ccba077984790c95b78168990c300670b8d5a88fab319d5dc  ./rustd-resolved-debug-0.2.1-5-x86_64.pkg.tar.zst.sig
+4a00a84971beed4762f609f58156f883c0ee5142466231b36767159875872c3d  ./tuned-rs-0.2.10-2-x86_64.pkg.tar.zst.sig
+dbe3359853d8741d3c1d6a4b2e0beb383f4d2911e823ad4edf75b454097f1ec1  ./tuned-rs-debug-0.2.10-2-x86_64.pkg.tar.zst.sig
+357e61181bbc8076a253b26901b24cc36052f89f84a4dbc6d046f15958a40180  sisyphus.db.tar.gz
+63d30d9c4b2bb0f52b5a809940f83c4ed1ea5ef0cef04df55c9da88c129d74bd  sisyphus.db.tar.gz.sig
