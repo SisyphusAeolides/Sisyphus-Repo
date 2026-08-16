@@ -24,7 +24,7 @@ pkgbase = rustd
 	conflicts = rustd-git
 	replaces = systemd-git
 	replaces = rustd-git
-	source = git+https://github.com/SisyphusAeolides/rustd.git#commit=a07d95ea540790da816e2400640fb7890b0e1932
+	source = git+https://github.com/SisyphusAeolides/rustd.git#commit=c9b08503ea52bbe1a67956a7e15196f4078419aa
 	sha256sums = SKIP
 
 pkgname = rustd

@@ -2,7 +2,7 @@
 pkgname=rustd
 pkgver=0.1.0
 pkgrel=3
-_commit=a07d95ea540790da816e2400640fb7890b0e1932
+_commit=c9b08503ea52bbe1a67956a7e15196f4078419aa
 pkgdesc="Compatibility-oriented reimplementation of systemd"
 arch=('x86_64')
 url="https://github.com/SisyphusAeolides/rustd"

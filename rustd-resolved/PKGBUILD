@@ -2,7 +2,7 @@
 pkgname=rustd-resolved
 pkgver=0.2.1
 pkgrel=4
-_commit=9664e097f9e688474944ab4ab837eef1a83beb7f
+_commit=b58e93511bc0d1b17c790871fc2e12be0d0ec5de
 pkgdesc="Compatibility-oriented Rust reimplementation of systemd-resolved"
 arch=('x86_64')
 url="https://github.com/SisyphusAeolides/rustd-resolved"

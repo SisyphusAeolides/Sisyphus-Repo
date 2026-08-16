@@ -21,7 +21,7 @@ pkgbase = rustd-resolved
 	replaces = systemd-resolved
 	replaces = systemd-resolved-git
 	replaces = rustd-resolved-git
-	source = git+https://github.com/SisyphusAeolides/rustd-resolved.git#commit=9664e097f9e688474944ab4ab837eef1a83beb7f
+	source = git+https://github.com/SisyphusAeolides/rustd-resolved.git#commit=b58e93511bc0d1b17c790871fc2e12be0d0ec5de
 	sha256sums = SKIP
 
 pkgname = rustd-resolved
