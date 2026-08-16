@@ -1,8 +1,8 @@
 # Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
 pkgname=elan-guardian
 pkgver=0.2.15
-pkgrel=1
-_commit=cf94e4813dfcb43905abd1072ea6304669d4a738
+pkgrel=2
+_commit=286830c99ec7700762133b1cfa5f60b30416d1d3
 pkgdesc="Evidence-driven diagnostics and recovery for Elantech I2C input controllers"
 arch=('x86_64')
 url="https://github.com/SisyphusAeolides/elan-guardian"

@@ -1,7 +1,7 @@
 pkgbase = rustd
 	pkgdesc = Compatibility-oriented reimplementation of systemd
 	pkgver = 0.1.0
-	pkgrel = 3
+	pkgrel = 4
 	url = https://github.com/SisyphusAeolides/rustd
 	arch = x86_64
 	license = LGPL-2.1-or-later
