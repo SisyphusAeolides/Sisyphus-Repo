@@ -1,7 +1,7 @@
 pkgbase = ccze-rs
 	pkgdesc = Fast streaming log colorizer with native analytics and formally specified protocol verification
 	pkgver = 0.5.4
-	pkgrel = 2
+	pkgrel = 3
 	url = https://github.com/SisyphusAeolides/ccze-rs
 	arch = x86_64
 	license = MIT

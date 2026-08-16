@@ -1,7 +1,7 @@
 # Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
 pkgname=libinput-rs
 pkgver=0.3.11
-pkgrel=2
+pkgrel=3
 _commit=3cb534b00629fbc846cfcd13bd642653a0ceb6a0
 pkgdesc="100% drop-in Rust replacement for the libinput 1.31.3 C ABI and tools"
 arch=('x86_64')
