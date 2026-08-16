@@ -3,7 +3,7 @@ pkgname=rustd
 pkgver=0.1.2
 pkgrel=1
 # Exact signed SHA promoted for exclusive CachyOS replacement.
-_commit=13d843c513fc520ccdc985d0a4af2467d7dcc87e
+_commit=1a4ede37920816c990e78cf9d70256f8af0287ed
 pkgdesc="RustD init and service manager (exclusive systemd replacement)"
 arch=('x86_64')
 url="https://github.com/SisyphusAeolides/rustd"
