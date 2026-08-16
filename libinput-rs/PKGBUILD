@@ -1,0 +1,45 @@
+# Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
+pkgname=libinput-rs
+pkgver=0.3.11
+pkgrel=1
+_commit=a804e2a03beffc8596629b2484cde95781c89dd0
+pkgdesc="100% drop-in Rust replacement for the libinput 1.31.3 C ABI and tools"
+arch=('x86_64')
+url="https://github.com/SisyphusAeolides/libinput-rs"
+license=('MIT')
+depends=('glibc' 'gcc-libs' 'systemd-libs' 'libevdev' 'mtdev' 'python-libevdev' 'python-pyudev' 'python-yaml')
+makedepends=('cargo' 'git' 'gcc-fortran' 'meson' 'curl' 'patch' 'ninja')
+provides=('libinput')
+conflicts=('libinput' 'libinput-rs-git')
+replaces=('libinput' 'libinput-rs-git')
+
+_tools_commit=26191d396d74d505541d6311f0b4ae68d791b890
+source=(
+  "git+${url}.git#commit=${_commit}"
+  "https://gitlab.freedesktop.org/libinput/libinput/-/archive/${_tools_commit}/libinput-${_tools_commit}.tar.gz"
+)
+sha256sums=(
+  'SKIP'
+  'd5d8c8464f9cb24b0897c03edfe7d7c9e75ff5a91fe9b5b48791781aa9642858'
+)
+
+build() {
+  cd "$pkgname"
+  # Point the Makefile at the pre-downloaded upstream tools archive and use
+  # Arch's lib path; upstream-tools-source will skip the curl download when
+  # the archive already exists at the expected path.
+  _tools_archive="$srcdir/libinput-${_tools_commit}.tar.gz"
+  make all upstream-tools \
+    LIBDIR=/usr/lib \
+    RPM_TOPDIR="$srcdir" \
+    UPSTREAM_TOOLS_ARCHIVE="$_tools_archive"
+}
+
+package() {
+  cd "$pkgname"
+  make DESTDIR="$pkgdir" PREFIX=/usr LIBDIR=/usr/lib \
+    RPM_TOPDIR="$srcdir" \
+    UPSTREAM_TOOLS_ARCHIVE="$srcdir/libinput-${_tools_commit}.tar.gz" \
+    install
+  install -Dm0644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}

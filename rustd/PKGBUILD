@@ -1,0 +1,26 @@
+# Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
+pkgname=rustd
+pkgver=0.1.0
+pkgrel=3
+_commit=a07d95ea540790da816e2400640fb7890b0e1932
+pkgdesc="Compatibility-oriented reimplementation of systemd"
+arch=('x86_64')
+url="https://github.com/SisyphusAeolides/rustd"
+license=('LGPL-2.1-or-later')
+depends=('glibc' 'gcc-libs' 'openssl' 'libcap' 'libseccomp' 'pam' 'dbus' 'audit' 'libxcrypt' 'pcre2')
+makedepends=('cargo' 'git' 'gcc-fortran')
+provides=('systemd')
+conflicts=('systemd' 'systemd-git' 'rustd-git')
+replaces=('systemd-git' 'rustd-git')
+source=("git+${url}.git#commit=${_commit}")
+sha256sums=('SKIP')
+
+build() {
+  cd "$pkgname"
+  make build
+}
+
+package() {
+  cd "$pkgname"
+  make DESTDIR="$pkgdir" PREFIX=/usr install
+}

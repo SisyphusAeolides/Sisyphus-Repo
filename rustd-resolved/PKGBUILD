@@ -1,0 +1,26 @@
+# Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
+pkgname=rustd-resolved
+pkgver=0.2.1
+pkgrel=4
+_commit=9664e097f9e688474944ab4ab837eef1a83beb7f
+pkgdesc="Compatibility-oriented Rust reimplementation of systemd-resolved"
+arch=('x86_64')
+url="https://github.com/SisyphusAeolides/rustd-resolved"
+license=('LGPL-2.1-or-later')
+depends=('glibc' 'gcc-libs' 'openssl' 'systemd' 'liburing')
+makedepends=('cargo' 'git' 'gcc-fortran' 'liburing')
+provides=('systemd-resolved')
+conflicts=('systemd-resolved' 'systemd-resolved-git' 'rustd-resolved-git')
+replaces=('systemd-resolved' 'systemd-resolved-git' 'rustd-resolved-git')
+source=("git+${url}.git#commit=${_commit}")
+sha256sums=('SKIP')
+
+build() {
+  cd "$pkgname"
+  make build
+}
+
+package() {
+  cd "$pkgname"
+  make DESTDIR="$pkgdir" PREFIX=/usr install
+}

@@ -1,0 +1,181 @@
+name: Build and Publish Pacman Repo
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: sisyphus-pacman-repo
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build-packages:
+    runs-on: ubuntu-latest
+    container:
+      image: archlinux:base-devel
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup environment
+        run: |
+          pacman -Syu --noconfirm
+          # Install general dependencies we know we need
+          pacman -S --noconfirm git gcc-fortran meson curl patch rust cargo gnupg pacman-contrib rpm-tools
+          useradd -m builduser
+          echo "builduser ALL=(ALL) NOPASSWD: /usr/bin/pacman" >> /etc/sudoers
+          chown -R builduser:builduser .
+
+      - name: Import release signing authority
+        env:
+          REPOSITORY_SIGNING_KEY: ${{ secrets.SISYPHUS_REPOSITORY_SIGNING_KEY }}
+          REPOSITORY_SIGNING_PASSPHRASE: ${{ secrets.SISYPHUS_REPOSITORY_SIGNING_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          test -n "$REPOSITORY_SIGNING_KEY"
+          test -n "$REPOSITORY_SIGNING_PASSPHRASE"
+          export GNUPGHOME="$RUNNER_TEMP/gnupg"
+          install -d -m 0700 "$GNUPGHOME"
+          printf '%s' "$REPOSITORY_SIGNING_KEY" | base64 --decode \
+            | gpg --batch --import
+          printf 'pinentry-mode loopback\n' > "$GNUPGHOME/gpg.conf"
+          printf 'allow-loopback-pinentry\n' > "$GNUPGHOME/gpg-agent.conf"
+          gpgconf --kill gpg-agent
+          mapfile -t fingerprints < <(gpg --batch --with-colons --list-secret-keys \
+            | awk -F: '$1 == "sec" { primary = 1; next } primary && $1 == "fpr" { print $10; primary = 0 }')
+          test "${#fingerprints[@]}" -eq 1
+          fingerprint="${fingerprints[0]}"
+          test "$fingerprint" = 2A02745D8C2C03AE7F95BCEA8136EB9238213447
+          mapfile -t distribution_fingerprints < <(
+            gpg --batch --show-keys --with-colons \
+              "$GITHUB_WORKSPACE/keys/sisyphus-repo.asc" \
+              | awk -F: '$1 == "pub" { primary = 1; next } primary && $1 == "fpr" { print $10; primary = 0 }'
+          )
+          test "${#distribution_fingerprints[@]}" -eq 1
+          test "${distribution_fingerprints[0]}" = "$fingerprint"
+          {
+            echo "GNUPGHOME=$GNUPGHOME"
+            echo "SISYPHUS_SIGNING_FINGERPRINT=$fingerprint"
+          } >> "$GITHUB_ENV"
+
+      - name: Build PKGBUILDs
+        run: |
+          runuser -u builduser -- bash -c '
+            set -euo pipefail
+            git config --global --add safe.directory "*"
+            mkdir -p x86_64
+            
+            for pkg in ccze-rs elan-guardian libinput-rs tuned-rs rustd rustd-resolved; do
+              cd $pkg
+              mapfile -t artifacts < <(makepkg --packagelist)
+              makepkg -s --noconfirm --cleanbuild --clean
+              for artifact in "${artifacts[@]}"; do
+                test -f "$artifact"
+                cp "$artifact" ../x86_64/
+              done
+              cd ..
+            done
+          '
+
+      - name: Sign and index package repository
+        env:
+          REPOSITORY_SIGNING_PASSPHRASE: ${{ secrets.SISYPHUS_REPOSITORY_SIGNING_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          cd x86_64
+          test -n "$(find . -maxdepth 1 -name "*.pkg.tar.zst" -print -quit)"
+          sign_detached() {
+            gpg --batch --yes --pinentry-mode loopback \
+              --passphrase-fd 3 \
+              --local-user "$SISYPHUS_SIGNING_FINGERPRINT" \
+              --detach-sign "$1" 3<<<"$REPOSITORY_SIGNING_PASSPHRASE"
+          }
+          for artifact in ./*.pkg.tar.zst; do
+            sign_detached "$artifact"
+          done
+          repo-add sisyphus.db.tar.gz ./*.pkg.tar.zst
+          sign_detached sisyphus.db.tar.gz
+          ln -sfn sisyphus.db.tar.gz sisyphus.db
+          ln -sfn sisyphus.db.tar.gz.sig sisyphus.db.sig
+          for artifact in ./*.pkg.tar.zst sisyphus.db.tar.gz; do
+            test -s "$artifact.sig"
+            gpg --batch --verify "$artifact.sig" "$artifact"
+          done
+          snapshot="sisyphus-snapshot-${GITHUB_SHA}.sha256"
+          {
+            printf 'source_commit=%s\n' "$GITHUB_SHA"
+            printf 'workflow_run=%s\n' "$GITHUB_RUN_ID"
+            printf 'workflow_attempt=%s\n' "$GITHUB_RUN_ATTEMPT"
+            printf 'created_at=%s\n' "$(date --utc --iso-8601=seconds)"
+            sha256sum ./*.pkg.tar.zst ./*.pkg.tar.zst.sig \
+              sisyphus.db.tar.gz sisyphus.db.tar.gz.sig
+          } > "$snapshot"
+          sign_detached "$snapshot"
+          test -s "$snapshot.sig"
+          gpg --batch --verify "$snapshot.sig" "$snapshot"
+
+      - name: Remove signing authority
+        if: always()
+        run: |
+          set -euo pipefail
+          gpgconf --homedir "$RUNNER_TEMP/gnupg" --kill all || true
+          rm -rf "$RUNNER_TEMP/gnupg"
+
+      - name: Upload Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pacman-repo
+          path: x86_64/
+          if-no-files-found: error
+
+  deploy-pages:
+    needs: build-packages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout published snapshots
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: previous-pages
+      
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: pacman-repo
+          path: public/x86_64
+          merge-multiple: true
+
+      - name: Preserve immutable repository snapshot
+        run: |
+          set -euo pipefail
+          snapshot="sisyphus-snapshot-${GITHUB_SHA}.sha256"
+          test -s "public/x86_64/$snapshot"
+          test -s "public/x86_64/$snapshot.sig"
+          if [ -e "previous-pages/snapshots/$GITHUB_SHA" ]; then
+            echo "Refusing to replace immutable snapshot for $GITHUB_SHA" >&2
+            exit 1
+          fi
+          if [ -d previous-pages/snapshots ]; then
+            mkdir -p public/snapshots
+            cp -a previous-pages/snapshots/. public/snapshots/
+          fi
+          mkdir -p "public/snapshots/$GITHUB_SHA"
+          cp -a "public/x86_64/." "public/snapshots/$GITHUB_SHA/"
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
+          publish_branch: gh-pages
+          user_name: Sisyphus Aeolides
+          user_email: SisyphusAeolides@pm.me
+          commit_message: Publish Sisyphus pacman repository
