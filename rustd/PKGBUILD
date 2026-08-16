@@ -1,26 +1,51 @@
 # Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
 pkgname=rustd
 pkgver=0.1.1
-pkgrel=1
-_commit=2262e461ee4b70e27dac0ed6ad0420ef3bd99d16
-pkgdesc="Compatibility-oriented reimplementation of systemd"
+pkgrel=2
+# Exact signed SHA certified for side-by-side CachyOS alternate-boot.
+_commit=661f8acc8e2dd67ac8e4933affb28174ba860cdc
+pkgdesc="RustD init and service manager (side-by-side certification build)"
 arch=('x86_64')
 url="https://github.com/SisyphusAeolides/rustd"
 license=('LGPL-2.1-or-later')
 depends=('glibc' 'gcc-libs' 'openssl' 'libcap' 'libseccomp' 'pam' 'dbus' 'audit' 'libxcrypt' 'pcre2')
 makedepends=('cargo' 'git' 'gcc-fortran')
-provides=('systemd')
-conflicts=('systemd' 'systemd-git' 'rustd-git')
-replaces=('systemd-git' 'rustd-git')
-source=("git+${url}.git#commit=${_commit}")
-sha256sums=('SKIP')
+# Certification packages must coexist with stock systemd for offline rollback.
+conflicts=('rustd-git')
+install=rustd.install
+source=("git+${url}.git#commit=${_commit}"
+        "rustd-boot-entry.conf"
+        "90-rustd-boot.hook"
+        "rustd-configure-boot")
+sha256sums=('SKIP'
+            'SKIP'
+            'SKIP'
+            'SKIP')
 
 build() {
   cd "$pkgname"
   make build
 }
 
+check() {
+  cd "$pkgname"
+  make check-native
+  make check-packaging
+}
+
 package() {
   cd "$pkgname"
   make DESTDIR="$pkgdir" PREFIX=/usr install
+
+  # Boot integration: separate RustD entry with init=/usr/lib/rustd/rustd.
+  install -Dm644 "$srcdir/rustd-boot-entry.conf" \
+    "$pkgdir/usr/lib/rustd/boot/rustd-boot-entry.conf"
+  install -Dm755 "$srcdir/rustd-configure-boot" \
+    "$pkgdir/usr/lib/rustd/boot/rustd-configure-boot"
+  install -Dm644 "$srcdir/90-rustd-boot.hook" \
+    "$pkgdir/usr/share/libalpm/hooks/90-rustd-boot.hook"
+
+  # Ownership markers used by package verification.
+  install -Dm644 /dev/null "$pkgdir/usr/lib/rustd/.side-by-side-certification"
+  printf '%s\n' "$_commit" >"$pkgdir/usr/lib/rustd/CERTIFIED_COMMIT"
 }

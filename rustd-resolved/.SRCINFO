@@ -1,8 +1,9 @@
 pkgbase = rustd-resolved
-	pkgdesc = Compatibility-oriented Rust reimplementation of systemd-resolved
+	pkgdesc = RustD DNS resolver (side-by-side certification build)
 	pkgver = 0.2.2
-	pkgrel = 1
+	pkgrel = 2
 	url = https://github.com/SisyphusAeolides/rustd-resolved
+	install = rustd-resolved.install
 	arch = x86_64
 	license = LGPL-2.1-or-later
 	makedepends = cargo
@@ -12,16 +13,9 @@ pkgbase = rustd-resolved
 	depends = glibc
 	depends = gcc-libs
 	depends = openssl
-	depends = systemd
 	depends = liburing
-	provides = systemd-resolved
-	conflicts = systemd-resolved
-	conflicts = systemd-resolved-git
 	conflicts = rustd-resolved-git
-	replaces = systemd-resolved
-	replaces = systemd-resolved-git
-	replaces = rustd-resolved-git
-	source = git+https://github.com/SisyphusAeolides/rustd-resolved.git#commit=b266df53a701718dae2ba586d8ec462b4d94c872
+	source = git+https://github.com/SisyphusAeolides/rustd-resolved.git#commit=d5f7610d2f8696c2b335115fe81c94fce362a05d
 	sha256sums = SKIP
 
 pkgname = rustd-resolved

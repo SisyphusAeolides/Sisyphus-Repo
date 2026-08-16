@@ -1,0 +1,8 @@
+post_install() {
+  echo "==> rustd-resolved certification package installed under /usr/lib/rustd."
+  echo "    It does not replace systemd-resolved during certification."
+}
+
+post_upgrade() {
+  post_install
+}

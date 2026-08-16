@@ -1,17 +1,18 @@
 # Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
 pkgname=rustd-resolved
 pkgver=0.2.2
-pkgrel=1
-_commit=b266df53a701718dae2ba586d8ec462b4d94c872
-pkgdesc="Compatibility-oriented Rust reimplementation of systemd-resolved"
+pkgrel=2
+# Exact signed SHA certified for side-by-side CachyOS alternate-boot.
+_commit=d5f7610d2f8696c2b335115fe81c94fce362a05d
+pkgdesc="RustD DNS resolver (side-by-side certification build)"
 arch=('x86_64')
 url="https://github.com/SisyphusAeolides/rustd-resolved"
 license=('LGPL-2.1-or-later')
-depends=('glibc' 'gcc-libs' 'openssl' 'systemd' 'liburing')
+depends=('glibc' 'gcc-libs' 'openssl' 'liburing')
 makedepends=('cargo' 'git' 'gcc-fortran' 'liburing')
-provides=('systemd-resolved')
-conflicts=('systemd-resolved' 'systemd-resolved-git' 'rustd-resolved-git')
-replaces=('systemd-resolved' 'systemd-resolved-git' 'rustd-resolved-git')
+# Coexists with systemd-resolved during certification; no provides/conflicts.
+conflicts=('rustd-resolved-git')
+install=rustd-resolved.install
 source=("git+${url}.git#commit=${_commit}")
 sha256sums=('SKIP')
 
@@ -20,7 +21,16 @@ build() {
   make build
 }
 
+check() {
+  cd "$pkgname"
+  cargo test --locked --lib spawn_does_not_require -- --test-threads=1
+  cargo test --locked --lib default_fallback_upstreams -- --test-threads=1
+}
+
 package() {
   cd "$pkgname"
+  # Native install only — no D-Bus/NSS systemd-resolved collisions.
   make DESTDIR="$pkgdir" PREFIX=/usr install
+  install -Dm644 /dev/null "$pkgdir/usr/lib/rustd/resolved/.side-by-side-certification"
+  printf '%s\n' "$_commit" >"$pkgdir/usr/lib/rustd/resolved/CERTIFIED_COMMIT"
 }

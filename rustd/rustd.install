@@ -1,0 +1,16 @@
+post_install() {
+  echo "==> RustD certification package installed side-by-side with systemd."
+  echo "    Boot the 'RustD (certification)' entry to run init=/usr/lib/rustd/rustd."
+  echo "    Offline rollback: select the stock systemd boot entry."
+  /usr/lib/rustd/boot/rustd-configure-boot || true
+}
+
+post_upgrade() {
+  post_install
+}
+
+pre_remove() {
+  rm -f /boot/loader/entries/rustd-certification.conf \
+        /boot/loader/entries/.rustd-systemd-rollback \
+        /etc/grub.d/09_rustd_certification 2>/dev/null || true
+}
