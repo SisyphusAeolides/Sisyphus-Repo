@@ -1,7 +1,7 @@
 pkgbase = rustd
 	pkgdesc = Compatibility-oriented reimplementation of systemd
-	pkgver = 0.1.0
-	pkgrel = 7
+	pkgver = 0.1.1
+	pkgrel = 1
 	url = https://github.com/SisyphusAeolides/rustd
 	arch = x86_64
 	license = LGPL-2.1-or-later
@@ -24,7 +24,7 @@ pkgbase = rustd
 	conflicts = rustd-git
 	replaces = systemd-git
 	replaces = rustd-git
-	source = git+https://github.com/SisyphusAeolides/rustd.git#commit=0bbc4a9112e8613fd0baa8bac801990abb03c569
+	source = git+https://github.com/SisyphusAeolides/rustd.git#commit=2262e461ee4b70e27dac0ed6ad0420ef3bd99d16
 	sha256sums = SKIP
 
 pkgname = rustd
