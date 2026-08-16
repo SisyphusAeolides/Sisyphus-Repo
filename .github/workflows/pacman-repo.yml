@@ -41,14 +41,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for pkg in ccze-rs elan-guardian libinput-rs tuned-rs rustd rustd-resolved; do
-            (
-              cd "$pkg"
-              diff -u .SRCINFO <(makepkg --printsrcinfo)
-              source PKGBUILD
-              [[ $_commit =~ ^[0-9a-f]{40}$ ]]
-            )
-          done
+          runuser -u builduser -- bash -c '
+            set -euo pipefail
+            for pkg in ccze-rs elan-guardian libinput-rs tuned-rs rustd rustd-resolved; do
+              (
+                cd "$pkg"
+                diff -u .SRCINFO <(makepkg --printsrcinfo)
+                source PKGBUILD
+                [[ $_commit =~ ^[0-9a-f]{40}$ ]]
+              )
+            done
+          '
 
       - name: Build packages
         shell: bash
