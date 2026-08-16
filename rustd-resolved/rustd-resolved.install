@@ -1,7 +1,19 @@
 post_install() {
   echo "==> rustd-resolved owns host DNS (NSS + stub resolv.conf)."
-  if [[ -f /etc/nsswitch.conf ]] && ! grep -Eq '\bresolve\b' /etc/nsswitch.conf; then
-    echo "    Add 'resolve [!UNAVAIL=return]' ahead of 'dns' in /etc/nsswitch.conf hosts: lines."
+
+  if [[ -f /etc/nsswitch.conf ]]; then
+    if ! grep -Eq '^[[:space:]]*hosts:.*\bresolve\b' /etc/nsswitch.conf; then
+      # Insert resolve ahead of dns on hosts: lines (exclusive replacement contract).
+      sed -i -E \
+        's/^([[:space:]]*hosts:.*)([[:space:]]+)dns\b/\1\2resolve [!UNAVAIL=return] dns/' \
+        /etc/nsswitch.conf || true
+      if grep -Eq '^[[:space:]]*hosts:.*\bresolve\b' /etc/nsswitch.conf; then
+        echo "    Updated /etc/nsswitch.conf hosts: to include resolve [!UNAVAIL=return]."
+      else
+        echo "    WARNING: could not auto-update hosts: in /etc/nsswitch.conf;"
+        echo "    add 'resolve [!UNAVAIL=return]' ahead of 'dns' manually."
+      fi
+    fi
   fi
 }
 
