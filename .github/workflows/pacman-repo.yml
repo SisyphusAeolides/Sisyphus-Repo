@@ -33,6 +33,9 @@ jobs:
           set -euo pipefail
           pacman -Syu --noconfirm
           pacman -S --noconfirm cargo curl gcc-fortran git meson patch rpm-tools rust
+          if [[ ! -s /etc/machine-id ]]; then
+            tr -d '-' </proc/sys/kernel/random/boot_id >/etc/machine-id
+          fi
           useradd -m builduser
           printf 'builduser ALL=(ALL) NOPASSWD: /usr/bin/pacman\n' >> /etc/sudoers
           chown -R builduser:builduser .
