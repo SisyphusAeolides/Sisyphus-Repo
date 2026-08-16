@@ -1,7 +1,7 @@
 pkgbase = libinput-rs
 	pkgdesc = 100% drop-in Rust replacement for the libinput 1.31.3 C ABI and tools
 	pkgver = 0.3.11
-	pkgrel = 3
+	pkgrel = 4
 	url = https://github.com/SisyphusAeolides/libinput-rs
 	arch = x86_64
 	license = MIT

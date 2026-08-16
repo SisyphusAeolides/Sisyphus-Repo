@@ -1,8 +1,8 @@
 # Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
 pkgname=rustd-resolved
 pkgver=0.2.1
-pkgrel=6
-_commit=b58e93511bc0d1b17c790871fc2e12be0d0ec5de
+pkgrel=7
+_commit=3e7a9f2a3a048a235c6a46855f58eb6e2d0a835c
 pkgdesc="Compatibility-oriented Rust reimplementation of systemd-resolved"
 arch=('x86_64')
 url="https://github.com/SisyphusAeolides/rustd-resolved"
