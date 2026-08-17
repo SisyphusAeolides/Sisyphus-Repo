@@ -1,9 +1,8 @@
 pkgbase = rustd
-	pkgdesc = RustD init and service manager (exclusive systemd replacement)
+	pkgdesc = RustD native init and service manager
 	pkgver = 0.1.2
-	pkgrel = 1
+	pkgrel = 6
 	url = https://github.com/SisyphusAeolides/rustd
-	install = rustd.install
 	arch = x86_64
 	license = LGPL-2.1-or-later
 	makedepends = cargo
@@ -11,6 +10,23 @@ pkgbase = rustd
 	makedepends = gcc-fortran
 	makedepends = dbus
 	makedepends = pam
+	options = !lto
+	source = git+https://github.com/SisyphusAeolides/rustd.git#commit=a50abcb6c23c0f69c5fe4e156a1a0e7db32b32d7
+	source = rustd-boot-entry.conf
+	source = rustd-configure-boot
+	source = rustd-udev.install
+	source = rustd-udev.hook
+	source = native-libs.patch
+	sha256sums = SKIP
+	sha256sums = b42a92cb8a8d5c9208ba82d32a9d65fc2e77d05e4d860ea0e2bb799238e3bb8e
+	sha256sums = 3da2e2d113daa68727ad298a5914f2635bf1f56da411884d63ee358d0ad5ea39
+	sha256sums = 304967b6406dbee254d3b2ba432f287df633d10c1742bf90485d1eb65f308e61
+	sha256sums = 9b99f4a525f89847c3cb9981e3e7351e74795423499c0ed75f1fd22bd1e3aa98
+	sha256sums = 38e76daf961ecfb4c9abe2e4c46e7b2904224ab9518305eb147309b1d4425f77
+
+pkgname = rustd
+	pkgdesc = RustD native init and service manager
+	install = rustd.install
 	depends = glibc
 	depends = gcc-libs
 	depends = openssl
@@ -21,20 +37,18 @@ pkgbase = rustd
 	depends = audit
 	depends = libxcrypt
 	depends = pcre2
-	depends = systemd-libs
-	provides = systemd
-	provides = udev
-	provides = systemd-tools
-	conflicts = systemd
+	depends = rustd-libs
 	conflicts = rustd-git
-	replaces = systemd
-	source = git+https://github.com/SisyphusAeolides/rustd.git#commit=a50abcb6c23c0f69c5fe4e156a1a0e7db32b32d7
-	source = rustd-boot-entry.conf
-	source = 90-rustd-boot.hook
-	source = rustd-configure-boot
-	sha256sums = SKIP
-	sha256sums = SKIP
-	sha256sums = SKIP
-	sha256sums = SKIP
 
-pkgname = rustd
+pkgname = rustd-libs
+	pkgdesc = RustD native shared libraries (service/journal/device/login/manager)
+	depends = glibc
+
+pkgname = rustd-compat
+	pkgdesc = Preview libsystemd/libudev shims over librustd_* (not a systemd-libs replacement)
+	depends = glibc
+	depends = rustd-libs
+
+pkgname = rustd-devel
+	pkgdesc = RustD native C headers and pkg-config files
+	depends = rustd-libs

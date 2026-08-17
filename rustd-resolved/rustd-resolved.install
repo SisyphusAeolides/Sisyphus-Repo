@@ -1,20 +1,43 @@
+_rustd_resolved_nss_name() {
+  printf '%s\n' "${RUSTD_RESOLVED_NSS_NAME:-rustd_dns}"
+}
+
 post_install() {
+  local nss_name nsswitch
+  nss_name="$(_rustd_resolved_nss_name)"
+  nsswitch="${RUSTD_RESOLVED_NSSWITCH:-/etc/nsswitch.conf}"
+  [[ "$nss_name" =~ ^[a-z0-9_]+$ && "$nss_name" != resolve && "$nss_name" != rustd_resolve ]] || {
+    echo "==> ERROR: invalid or non-native RustD NSS module name: $nss_name" >&2
+    return 1
+  }
+
   echo "==> rustd-resolved owns host DNS (NSS + stub resolv.conf)."
 
-  if [[ -f /etc/nsswitch.conf ]]; then
-    if ! grep -Eq '^[[:space:]]*hosts:.*\bresolve\b' /etc/nsswitch.conf; then
-      # Insert resolve ahead of dns on hosts: lines (exclusive replacement contract).
+  if [[ -f "$nsswitch" ]]; then
+    sed -i -E \
+      -e "s/^([[:space:]]*hosts:.*[[:space:]])resolve([[:space:]]|$)/\\1${nss_name}\\2/" \
+      -e "s/^([[:space:]]*hosts:.*[[:space:]])rustd_resolve([[:space:]]|$)/\\1${nss_name}\\2/" \
+      "$nsswitch" || true
+    if ! grep -Eq "^[[:space:]]*hosts:.*(^|[[:space:]])${nss_name}([[:space:]]|$)" \
+      "$nsswitch"; then
+      # Insert the RustD-native NSS module ahead of dns on hosts: lines.
       sed -i -E \
-        's/^([[:space:]]*hosts:.*)([[:space:]]+)dns\b/\1\2resolve [!UNAVAIL=return] dns/' \
-        /etc/nsswitch.conf || true
-      if grep -Eq '^[[:space:]]*hosts:.*\bresolve\b' /etc/nsswitch.conf; then
-        echo "    Updated /etc/nsswitch.conf hosts: to include resolve [!UNAVAIL=return]."
+        "s/^([[:space:]]*hosts:.*)([[:space:]]+)dns([[:space:]]|$)/\\1\\2${nss_name} [!UNAVAIL=return] dns\\3/" \
+        "$nsswitch" || true
+      if grep -Eq "^[[:space:]]*hosts:.*(^|[[:space:]])${nss_name}([[:space:]]|$)" \
+        "$nsswitch"; then
+        echo "    Updated /etc/nsswitch.conf hosts: to include ${nss_name} [!UNAVAIL=return]."
       else
         echo "    WARNING: could not auto-update hosts: in /etc/nsswitch.conf;"
-        echo "    add 'resolve [!UNAVAIL=return]' ahead of 'dns' manually."
+        echo "    add '${nss_name} [!UNAVAIL=return]' ahead of 'dns' manually."
       fi
     fi
   fi
+
+  if [[ -d /etc/NetworkManager/conf.d ]] || [[ -d /usr/lib/NetworkManager/conf.d ]]; then
+    echo "    NetworkManager dns=default drop-in ships with this package (20-rustd-resolved.conf)."
+  fi
+  echo "    Stub resolv.conf: /run/rustd/resolve/stub-resolv.conf (via tmpfiles)."
 }
 
 post_upgrade() {

@@ -1,19 +1,26 @@
 # Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
 pkgname=tuned-rs
 pkgver=0.2.10
-pkgrel=4
+pkgrel=5
 _commit=4ef6c39f639891cdc7842f489cbd8fa42466212b
 pkgdesc="High-performance Rust implementation of the TuneD system tuning daemon"
 arch=('x86_64')
 url="https://github.com/SisyphusAeolides/tuned-rs"
 license=('GPL2')
-depends=('glibc' 'gcc-libs' 'systemd-libs')
-makedepends=('cargo' 'git')
+depends=('glibc' 'gcc-libs' 'rustd-libs')
+makedepends=('cargo' 'git' 'rustd-devel')
 provides=('power-profiles-daemon' 'tuned')
 conflicts=('power-profiles-daemon' 'tuned' 'tuned-rs-git')
 replaces=('power-profiles-daemon' 'tuned' 'tuned-rs-git')
-source=("git+${url}.git#commit=${_commit}")
-sha256sums=('SKIP')
+source=("git+${url}.git#commit=${_commit}"
+        "retarget-rustd-device.patch")
+sha256sums=('SKIP'
+            '9a5ce89343cc42a9d55ea8f70fb47fd6d96a2a799930ae863bda492b9aa8b25c')
+
+prepare() {
+  cd "$pkgname"
+  patch -p1 <"$srcdir/retarget-rustd-device.patch"
+}
 
 build() {
   cd "$pkgname"
@@ -22,6 +29,13 @@ build() {
 
 package() {
   cd "$pkgname"
-  make DESTDIR="$pkgdir" PREFIX=/usr SBINDIR=/usr/bin install
+  make DESTDIR="$pkgdir" PREFIX=/usr SBINDIR=/usr/bin \
+    SYSTEMDUNITDIR=/usr/lib/rustd/system \
+    install
+  # Native purity: refuse leftover systemd unit paths.
+  if [[ -d "$pkgdir/usr/lib/systemd" ]]; then
+    echo "tuned-rs must not install under /usr/lib/systemd" >&2
+    return 1
+  fi
   install -Dm0644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }

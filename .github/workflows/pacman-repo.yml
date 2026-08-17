@@ -56,6 +56,15 @@ jobs:
             done
           '
 
+      - name: Validate native cutover manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 -m py_compile scripts/audit-systemd-closure.py
+          grep -Ev '^[[:space:]]*(#|$)' native-cutover-packages.txt |
+            LC_ALL=C sort -cu
+          test "$(grep -Evc '^[[:space:]]*(#|$)' native-cutover-packages.txt)" -gt 0
+
       - name: Build packages
         shell: bash
         run: |

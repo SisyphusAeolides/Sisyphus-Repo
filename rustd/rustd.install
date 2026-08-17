@@ -1,21 +1,235 @@
-post_install() {
-  echo "==> RustD exclusive replacement installed (conflicts with systemd)."
-  echo "    Primary boot entry will use init=/usr/lib/rustd/rustd."
-  echo "    Keep a CachyOS rescue USB until the first graphical boot succeeds."
+_rustd_state_dir() {
+  printf '%s\n' "${RUSTD_MIGRATION_STATE:-/var/lib/rustd/packaging/v1}"
+}
 
-  # Prefer classic mkinitcpio udev hooks once systemd is gone.
-  if [[ -f /etc/mkinitcpio.conf ]]; then
-    if grep -Eq 'HOOKS=.*\bsystemd\b' /etc/mkinitcpio.conf; then
-      sed -i -E \
-        -e 's/\bsystemd\b/udev/' \
-        -e 's/\bsd-vconsole\b/vconsole/' \
-        -e 's/\bsd-encrypt\b/encrypt/' \
-        /etc/mkinitcpio.conf || true
-      echo "==> Updated /etc/mkinitcpio.conf: systemd hooks -> udev/vconsole/encrypt"
-    fi
+_rustd_boot_helper() {
+  printf '%s\n' "${RUSTD_BOOT_HELPER:-/usr/lib/rustd/boot/rustd-configure-boot}"
+}
+
+_rustd_mkinitcpio() {
+  local command="${RUSTD_MKINITCPIO:-mkinitcpio}"
+  command -v "$command" >/dev/null 2>&1 || {
+    echo "==> ERROR: mkinitcpio is required for the RustD migration" >&2
+    return 1
+  }
+  "$command" -P
+}
+
+_rustd_config_key() {
+  printf '%s' "$1" | sha256sum | awk '{print $1}'
+}
+
+_rustd_configs() {
+  local main="${RUSTD_MKINITCPIO_MAIN:-/etc/mkinitcpio.conf}"
+  local dropins="${RUSTD_MKINITCPIO_DROPINS:-/etc/mkinitcpio.conf.d}"
+  [[ ! -f "$main" ]] || printf '%s\n' "$main"
+  if [[ -d "$dropins" ]]; then
+    local config
+    for config in "$dropins"/*.conf; do
+      [[ ! -f "$config" ]] || printf '%s\n' "$config"
+    done
   fi
+}
 
-  /usr/lib/rustd/boot/rustd-configure-boot || true
+_rustd_restore_transaction_configs() {
+  local transaction="$1" record config snapshot
+  [[ -f "$transaction/configs" ]] || return 0
+  while IFS=$'\t' read -r config snapshot; do
+    [[ -n "$config" && -f "$snapshot" ]] || continue
+    cp -a -- "$snapshot" "${config}.rustd-rollback"
+    mv -f -- "${config}.rustd-rollback" "$config"
+  done <"$transaction/configs"
+}
+
+_rustd_apply_migration() (
+  set -Eeuo pipefail
+  umask 077
+  local state transaction id config key original tmp changed=0 config_count=0
+  state="$(_rustd_state_dir)"
+  mkdir -p "$state/originals" "$state/applied" "$state/transactions"
+  if [[ -e "$state/schema-version" ]] && [[ "$(<"$state/schema-version")" != 1 ]]; then
+    echo "==> ERROR: unsupported RustD migration state version" >&2
+    return 1
+  fi
+  printf '1\n' >"$state/schema-version"
+  id="$(date -u +%Y%m%dT%H%M%SZ)-$$"
+  transaction="$state/transactions/$id"
+  mkdir -p "$transaction"
+  : >"$transaction/configs"
+  printf 'preparing\n' >"$transaction/status"
+  printf '%s\n' "$id" >"$state/current-transaction"
+
+  rollback_failed_transaction() {
+    local trapped_rc=$? rc
+    rc="${1:-$trapped_rc}"
+    trap - ERR
+    printf 'failed\n' >"$transaction/status"
+    _rustd_restore_transaction_configs "$transaction" || true
+    _rustd_mkinitcpio >/dev/null 2>&1 || true
+    echo "==> ERROR: RustD migration failed; pre-transaction initramfs configuration restored" >&2
+    exit "$rc"
+  }
+  trap rollback_failed_transaction ERR
+
+  while IFS= read -r config; do
+    [[ -f "$config" ]] || continue
+    config_count=$((config_count + 1))
+    key="$(_rustd_config_key "$config")"
+    original="$state/originals/$key"
+    cp -a -- "$config" "$transaction/config-$key"
+    printf '%s\t%s\n' "$config" "$transaction/config-$key" >>"$transaction/configs"
+    if [[ ! -e "$original" ]]; then
+      cp -a -- "$config" "$original"
+      printf '%s\n' "$config" >"$state/originals/$key.path"
+    fi
+
+    tmp="${config}.rustd.tmp"
+    sed -E \
+      -e 's/(^|[=([:space:]])systemd([)[:space:]]|$)/\1rustd-udev\2/g' \
+      -e 's/(^|[=([:space:]])udev([)[:space:]]|$)/\1rustd-udev\2/g' \
+      -e 's/(^|[=([:space:]])sd-vconsole([)[:space:]]|$)/\1keymap consolefont\2/g' \
+      -e 's/(^|[=([:space:]])vconsole([)[:space:]]|$)/\1keymap consolefont\2/g' \
+      -e 's/(^|[=([:space:]])sd-encrypt([)[:space:]]|$)/\1encrypt\2/g' \
+      -e 's/(^|[=([:space:]])sd-btrfs-overlayfs([)[:space:]]|$)/\1btrfs-overlayfs\2/g' \
+      "$config" >"$tmp"
+    chmod --reference="$config" "$tmp"
+    chown --reference="$config" "$tmp"
+    if cmp -s "$config" "$tmp"; then
+      rm -f -- "$tmp"
+    else
+      mv -f -- "$tmp" "$config"
+      changed=1
+    fi
+    sha256sum "$config" | awk '{print $1}' >"$state/applied/$key.sha256"
+  done < <(_rustd_configs)
+  (( config_count > 0 )) || {
+    echo "==> ERROR: no mkinitcpio configuration was found" >&2
+    return 1
+  }
+
+  if ! _rustd_mkinitcpio; then
+    rollback_failed_transaction 1
+  fi
+  if ! "$(_rustd_boot_helper)" apply; then
+    rollback_failed_transaction 1
+  fi
+  printf 'applied\n' >"$transaction/status"
+  trap - ERR
+  if (( changed )); then
+    echo "==> Updated and rebuilt mkinitcpio configuration for RustD"
+  else
+    echo "==> RustD mkinitcpio configuration already current; images rebuilt"
+  fi
+)
+
+_rustd_restore_migration() (
+  set -Eeuo pipefail
+  umask 077
+  local state record original config key expected current changed=0 transaction id
+  state="$(_rustd_state_dir)"
+  [[ -f "$state/schema-version" ]] || {
+    echo "==> RustD migration state is already absent"
+    return 0
+  }
+  [[ "$(<"$state/schema-version")" == 1 ]] || {
+    echo "==> ERROR: refusing to restore unknown RustD migration state" >&2
+    return 1
+  }
+
+  id="remove-$(date -u +%Y%m%dT%H%M%SZ)-$$"
+  transaction="$state/transactions/$id"
+  mkdir -p "$transaction"
+  : >"$transaction/configs"
+  printf 'preparing-removal\n' >"$transaction/status"
+
+  # Preflight every managed file before changing either the initramfs or boot.
+  for record in "$state"/originals/*.path; do
+    [[ -f "$record" ]] || continue
+    config="$(<"$record")"
+    key="$(basename "$record" .path)"
+    original="$state/originals/$key"
+    [[ -f "$original" ]] || {
+      echo "==> ERROR: missing original backup for $config" >&2
+      return 1
+    }
+    if [[ ! -e "$config" ]]; then
+      echo "==> ERROR: refusing removal because managed config disappeared: $config" >&2
+      return 1
+    fi
+    expected="$(<"$state/applied/$key.sha256")"
+    current="$(sha256sum "$config" | awk '{print $1}')"
+    if [[ "$current" == "$(sha256sum "$original" | awk '{print $1}')" ]]; then
+      :
+    elif [[ "$current" != "$expected" ]]; then
+      echo "==> ERROR: refusing to overwrite $config; it changed after RustD migration" >&2
+      return 1
+    fi
+    cp -a -- "$config" "$transaction/config-$key"
+    printf '%s\t%s\n' "$config" "$transaction/config-$key" >>"$transaction/configs"
+  done
+
+  for record in "$state"/originals/*.path; do
+    [[ -f "$record" ]] || continue
+    config="$(<"$record")"
+    key="$(basename "$record" .path)"
+    original="$state/originals/$key"
+    if cmp -s "$config" "$original"; then
+      continue
+    fi
+    cp -a -- "$original" "${config}.rustd-restore"
+    mv -f -- "${config}.rustd-restore" "$config"
+    changed=1
+  done
+  if ! _rustd_mkinitcpio; then
+    _rustd_restore_transaction_configs "$transaction" || true
+    _rustd_mkinitcpio >/dev/null 2>&1 || true
+    printf 'failed-removal\n' >"$transaction/status"
+    echo "==> ERROR: stock initramfs rebuild failed; RustD configuration restored" >&2
+    return 1
+  fi
+  if ! "$(_rustd_boot_helper)" restore; then
+    _rustd_restore_transaction_configs "$transaction" || true
+    _rustd_mkinitcpio >/dev/null 2>&1 || true
+    printf 'failed-removal\n' >"$transaction/status"
+    echo "==> ERROR: boot restore failed; RustD initramfs configuration restored" >&2
+    return 1
+  fi
+  printf 'restored\n' >"$transaction/status"
+  printf 'restored\n' >"$state/removal-status"
+  if (( changed )); then
+    echo "==> Restored pre-RustD mkinitcpio configuration and rebuilt images"
+  else
+    echo "==> Pre-RustD mkinitcpio configuration was already restored; images rebuilt"
+  fi
+)
+
+pre_install() {
+  # Fail closed: the preview rustd-compat shims do not yet cover this host's
+  # complete versioned ABI. Keep the proven client libraries until closure is
+  # certified; this does not require systemd to remain PID 1.
+  if pacman -Qq systemd-libs >/dev/null 2>&1; then
+    echo "==> systemd-libs retained as the temporary third-party client ABI."
+    return 0
+  fi
+  echo "==> ERROR: systemd-libs is required until rustd-compat passes full host ABI closure" >&2
+  return 1
+}
+
+pre_upgrade() {
+  pre_install
+}
+
+post_install() {
+  if ! pacman -Qq systemd-libs >/dev/null 2>&1; then
+    echo "==> ERROR: refusing boot migration without the certified third-party client ABI" >&2
+    return 1
+  fi
+  echo "==> Applying fail-closed RustD exclusive replacement migration."
+  _rustd_apply_migration || return 1
+  echo "==> RustD boot migration complete; a verified rollback entry is retained."
+  if command -v plasmalogin >/dev/null 2>&1; then
+    echo "==> Enable the display manager after cutover: rustctl enable --now plasmalogin.service"
+  fi
 }
 
 post_upgrade() {
@@ -23,6 +237,6 @@ post_upgrade() {
 }
 
 pre_remove() {
-  echo "==> Removing RustD exclusive replacement."
-  echo "    Restore a stock CachyOS/systemd image before rebooting without RustD."
+  echo "==> Restoring pre-RustD initramfs and boot configuration."
+  _rustd_restore_migration || return 1
 }

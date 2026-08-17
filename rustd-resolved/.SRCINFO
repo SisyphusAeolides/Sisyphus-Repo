@@ -1,7 +1,7 @@
 pkgbase = rustd-resolved
-	pkgdesc = RustD DNS resolver (exclusive host ownership)
+	pkgdesc = RustD native DNS resolver
 	pkgver = 0.2.3
-	pkgrel = 1
+	pkgrel = 4
 	url = https://github.com/SisyphusAeolides/rustd-resolved
 	install = rustd-resolved.install
 	arch = x86_64
@@ -15,7 +15,10 @@ pkgbase = rustd-resolved
 	depends = openssl
 	depends = liburing
 	depends = rustd
+	provides = dns-resolver
 	conflicts = rustd-resolved-git
+	conflicts = systemd-resolved
+	replaces = systemd-resolved
 	source = git+https://github.com/SisyphusAeolides/rustd-resolved.git#commit=f2f6cc1a81b6adc9f5320be4cab5de9eb24b6f72
 	sha256sums = SKIP
 

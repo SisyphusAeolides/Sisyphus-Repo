@@ -1,56 +1,125 @@
 # Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
-pkgname=rustd
+pkgbase=rustd
+pkgname=('rustd' 'rustd-libs' 'rustd-compat' 'rustd-devel')
 pkgver=0.1.2
-pkgrel=1
+pkgrel=8
 # Exact signed SHA promoted for exclusive CachyOS replacement.
 _commit=a50abcb6c23c0f69c5fe4e156a1a0e7db32b32d7
-pkgdesc="RustD init and service manager (exclusive systemd replacement)"
+pkgdesc="RustD native init and service manager"
 arch=('x86_64')
 url="https://github.com/SisyphusAeolides/rustd"
 license=('LGPL-2.1-or-later')
-depends=('glibc' 'gcc-libs' 'openssl' 'libcap' 'libseccomp' 'pam' 'dbus' 'audit' 'libxcrypt' 'pcre2' 'systemd-libs')
 makedepends=('cargo' 'git' 'gcc-fortran' 'dbus' 'pam')
-provides=('systemd' 'udev' 'systemd-tools')
-conflicts=('systemd' 'rustd-git')
-replaces=('systemd')
-install=rustd.install
+options=(!lto)
 source=("git+${url}.git#commit=${_commit}"
         "rustd-boot-entry.conf"
-        "90-rustd-boot.hook"
-        "rustd-configure-boot")
+        "rustd-configure-boot"
+        "rustd-udev.install"
+        "rustd-udev.hook"
+        "native-libs.patch")
 sha256sums=('SKIP'
-            'SKIP'
-            'SKIP'
-            'SKIP')
+            'b42a92cb8a8d5c9208ba82d32a9d65fc2e77d05e4d860ea0e2bb799238e3bb8e'
+            '3da2e2d113daa68727ad298a5914f2635bf1f56da411884d63ee358d0ad5ea39'
+            '304967b6406dbee254d3b2ba432f287df633d10c1742bf90485d1eb65f308e61'
+            '9b99f4a525f89847c3cb9981e3e7351e74795423499c0ed75f1fd22bd1e3aa98'
+            '38e76daf961ecfb4c9abe2e4c46e7b2904224ab9518305eb147309b1d4425f77')
+
+prepare() {
+  cd "$pkgbase"
+  # Hermetic build: only the pinned commit + checksummed patch/source files.
+  # Do not copy from absolute maintainer workspace paths.
+  if [[ -f "$srcdir/native-libs.patch" ]] && [[ -s "$srcdir/native-libs.patch" ]]; then
+    patch -p1 <"$srcdir/native-libs.patch"
+  fi
+}
 
 build() {
-  cd "$pkgname"
-  make build pam-module
+  cd "$pkgbase"
+  make build pam-module libs compat
 }
 
 check() {
-  cd "$pkgname"
+  cd "$pkgbase"
   make check-native
   make check-packaging
+  make check-compat
 }
 
-package() {
-  cd "$pkgname"
+package_rustd() {
+  pkgdesc="RustD native init and service manager"
+  depends=('glibc' 'gcc-libs' 'openssl' 'libcap' 'libseccomp' 'pam' 'dbus' 'audit' 'libxcrypt' 'pcre2' 'rustd-libs' 'mkinitcpio')
+  conflicts=('rustd-git')
+  install=rustd.install
+
+  cd "$pkgbase"
   make DESTDIR="$pkgdir" PREFIX=/usr install
 
-  # Pacman hooks and third-party packages still invoke systemctl(1).
-  ln -sf rustctl "$pkgdir/usr/bin/systemctl"
-  ln -sf rustctl "$pkgdir/usr/bin/journalctl"
-  ln -sf rustudevadm "$pkgdir/usr/bin/udevadm"
+  # Runtime shared libraries and devel files move to split packages.
+  rm -f "$pkgdir"/usr/lib/librustd_*.so*
+  rm -rf "$pkgdir"/usr/include/rustd
+  rm -f "$pkgdir"/usr/lib/pkgconfig/rustd-*.pc
+
+  # The pinned source still emits two compatibility aliases. They are not part
+  # of the native RustD package contract.
+  rm -f "$pkgdir/usr/lib/security/pam_systemd.so"
+  rm -f "$pkgdir/usr/lib/rustd/system/systemd-"*
 
   # Exclusive boot integration: rewrite the primary boot entry to RustD PID1.
   install -Dm644 "$srcdir/rustd-boot-entry.conf" \
     "$pkgdir/usr/lib/rustd/boot/rustd-boot-entry.conf"
   install -Dm755 "$srcdir/rustd-configure-boot" \
     "$pkgdir/usr/lib/rustd/boot/rustd-configure-boot"
-  install -Dm644 "$srcdir/90-rustd-boot.hook" \
-    "$pkgdir/usr/share/libalpm/hooks/90-rustd-boot.hook"
+  install -Dm644 "$srcdir/rustd-udev.install" \
+    "$pkgdir/usr/lib/initcpio/install/rustd-udev"
+  install -Dm644 "$srcdir/rustd-udev.hook" \
+    "$pkgdir/usr/lib/initcpio/hooks/rustd-udev"
 
   printf '%s\n' "$_commit" >"$pkgdir/usr/lib/rustd/CERTIFIED_COMMIT"
   install -Dm644 /dev/null "$pkgdir/usr/lib/rustd/.exclusive-replacement"
+}
+
+package_rustd-libs() {
+  pkgdesc="RustD native shared libraries (service/journal/device/login/manager)"
+  depends=('glibc')
+
+  cd "$pkgbase"
+  make libs
+  for lib in librustd_service librustd_journal librustd_device librustd_login librustd_manager; do
+    install -Dm0755 "build/libs/$lib.so.1" "$pkgdir/usr/lib/$lib.so.1"
+    ln -sfn "$lib.so.1" "$pkgdir/usr/lib/$lib.so"
+  done
+
+  # Purity: never ship systemd/udev SONAMEs from this package.
+  if find "$pkgdir" \( -name 'libsystemd.so*' -o -name 'libudev.so*' \) | grep -q .; then
+    echo "rustd-libs must not provide libsystemd/libudev" >&2
+    return 1
+  fi
+}
+
+package_rustd-compat() {
+  pkgdesc="Preview libsystemd/libudev shims over librustd_* (not a systemd-libs replacement)"
+  depends=('glibc' 'rustd-libs')
+
+  cd "$pkgbase"
+  make compat
+  install -Dm0755 build/libs/libudev.so.1 "$pkgdir/usr/lib/rustd/compat/libudev.so.1"
+  ln -sfn libudev.so.1 "$pkgdir/usr/lib/rustd/compat/libudev.so"
+  install -Dm0755 build/libs/libsystemd.so.0 "$pkgdir/usr/lib/rustd/compat/libsystemd.so.0"
+  ln -sfn libsystemd.so.0 "$pkgdir/usr/lib/rustd/compat/libsystemd.so"
+
+  readelf -d "$pkgdir/usr/lib/rustd/compat/libudev.so.1" | grep -Fq 'Library soname: [libudev.so.1]'
+  readelf -d "$pkgdir/usr/lib/rustd/compat/libsystemd.so.0" | grep -Fq 'Library soname: [libsystemd.so.0]'
+}
+
+package_rustd-devel() {
+  pkgdesc="RustD native C headers and pkg-config files"
+  depends=('rustd-libs')
+
+  cd "$pkgbase"
+  for hdr in include/rustd/*.h; do
+    install -Dm0644 "$hdr" "$pkgdir/usr/include/rustd/$(basename "$hdr")"
+  done
+  for pc in packaging/pkgconfig/*.pc; do
+    install -Dm0644 "$pc" "$pkgdir/usr/lib/pkgconfig/$(basename "$pc")"
+  done
 }

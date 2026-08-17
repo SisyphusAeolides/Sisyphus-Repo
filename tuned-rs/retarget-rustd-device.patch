@@ -1,0 +1,664 @@
+diff --git a/Cargo.lock b/Cargo.lock
+index f4d7496..6b80b13 100644
+--- a/Cargo.lock
++++ b/Cargo.lock
+@@ -480,16 +480,6 @@ version = "0.2.189"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "3eaf3ede3fee6db1a4c2ee091bf8a8b4dccdc6d17f656fb07896ee72867612f2"
+ 
+-[[package]]
+-name = "libudev-sys"
+-version = "0.1.4"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "3c8469b4a23b962c1396b9b451dda50ef5b283e8dd309d69033475fa9b334324"
+-dependencies = [
+- "libc",
+- "pkg-config",
+-]
+-
+ [[package]]
+ name = "linux-raw-sys"
+ version = "0.12.1"
+@@ -535,31 +525,6 @@ dependencies = [
+  "autocfg",
+ ]
+ 
+-[[package]]
+-name = "mio"
+-version = "0.7.14"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "8067b404fe97c70829f082dec8bcf4f71225d7eaea1d8645349cb76fa06205cc"
+-dependencies = [
+- "libc",
+- "log",
+- "miow",
+- "ntapi",
+- "winapi",
+-]
+-
+-[[package]]
+-name = "mio"
+-version = "0.8.11"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "a4a650543ca06a924e8b371db273b2756685faae30f8487da1b56505a8f78b0c"
+-dependencies = [
+- "libc",
+- "log",
+- "wasi",
+- "windows-sys 0.48.0",
+-]
+-
+ [[package]]
+ name = "mio"
+ version = "1.2.2"
+@@ -571,15 +536,6 @@ dependencies = [
+  "windows-sys 0.61.2",
+ ]
+ 
+-[[package]]
+-name = "miow"
+-version = "0.3.7"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "b9f1c5b025cda876f66ef43a113f91ebc9f4ccef34843000e0adf6ebbab84e21"
+-dependencies = [
+- "winapi",
+-]
+-
+ [[package]]
+ name = "nix"
+ version = "0.29.0"
+@@ -593,15 +549,6 @@ dependencies = [
+  "memoffset",
+ ]
+ 
+-[[package]]
+-name = "ntapi"
+-version = "0.3.7"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "c28774a7fd2fbb4f0babd8237ce554b73af68021b5f695a3cebd6c59bac0980f"
+-dependencies = [
+- "winapi",
+-]
+-
+ [[package]]
+ name = "nu-ansi-term"
+ version = "0.50.3"
+@@ -673,12 +620,6 @@ dependencies = [
+  "futures-io",
+ ]
+ 
+-[[package]]
+-name = "pkg-config"
+-version = "0.3.33"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "19f132c84eca552bf34cab8ec81f1c1dcc229b811638f9d283dceabe58c5569e"
+-
+ [[package]]
+ name = "polling"
+ version = "3.11.0"
+@@ -986,7 +927,7 @@ checksum = "202caea871b69668250d242070849eb495be178ed697a3e98aebce5bc81a0bed"
+ dependencies = [
+  "bytes",
+  "libc",
+- "mio 1.2.2",
++ "mio",
+  "parking_lot",
+  "pin-project-lite",
+  "signal-hook-registry",
+@@ -1006,18 +947,6 @@ dependencies = [
+  "syn 2.0.119",
+ ]
+ 
+-[[package]]
+-name = "tokio-udev"
+-version = "0.7.0"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "44b6256bb5be66b53b9ab51d05074d9cf3d50a05d099fa5eb6b42020cd907010"
+-dependencies = [
+- "futures-core",
+- "mio 0.7.14",
+- "tokio",
+- "udev",
+-]
+-
+ [[package]]
+ name = "toml_datetime"
+ version = "0.7.1"
+@@ -1122,7 +1051,6 @@ dependencies = [
+  "serde_json",
+  "tempfile",
+  "tokio",
+- "tokio-udev",
+  "tracing",
+  "tracing-subscriber",
+  "zbus",
+@@ -1134,18 +1062,6 @@ version = "1.20.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "b6f5e870be6c3b371b77fe0ee0bafb859fa4964b4404c27de1d380043c4dda20"
+ 
+-[[package]]
+-name = "udev"
+-version = "0.6.3"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "1c960764f7e816eed851a96c364745d37f9fe71a2e7dba79fbd40104530b5dd0"
+-dependencies = [
+- "libc",
+- "libudev-sys",
+- "mio 0.8.11",
+- "pkg-config",
+-]
+-
+ [[package]]
+ name = "uds_windows"
+ version = "1.1.0"
+@@ -1218,22 +1134,13 @@ version = "0.2.1"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "f0805222e57f7521d6a62e36fa9163bc891acd422f971defe97d64e70d0a4fe5"
+ 
+-[[package]]
+-name = "windows-sys"
+-version = "0.48.0"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "677d2418bec65e3338edb076e806bc1ec15693c5d0104683f2efe857f61056a9"
+-dependencies = [
+- "windows-targets 0.48.5",
+-]
+-
+ [[package]]
+ name = "windows-sys"
+ version = "0.52.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "282be5f36a8ce781fad8c8ae18fa3f9beff57ec1b52cb3de0789201425d9a33d"
+ dependencies = [
+- "windows-targets 0.52.6",
++ "windows-targets",
+ ]
+ 
+ [[package]]
+@@ -1242,7 +1149,7 @@ version = "0.59.0"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "1e38bc4d79ed67fd075bcc251a1c39b32a1776bbe92e5bef1f0bf1f8c531853b"
+ dependencies = [
+- "windows-targets 0.52.6",
++ "windows-targets",
+ ]
+ 
+ [[package]]
+@@ -1254,67 +1161,34 @@ dependencies = [
+  "windows-link",
+ ]
+ 
+-[[package]]
+-name = "windows-targets"
+-version = "0.48.5"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "9a2fa6e2155d7247be68c096456083145c183cbbbc2764150dda45a87197940c"
+-dependencies = [
+- "windows_aarch64_gnullvm 0.48.5",
+- "windows_aarch64_msvc 0.48.5",
+- "windows_i686_gnu 0.48.5",
+- "windows_i686_msvc 0.48.5",
+- "windows_x86_64_gnu 0.48.5",
+- "windows_x86_64_gnullvm 0.48.5",
+- "windows_x86_64_msvc 0.48.5",
+-]
+-
+ [[package]]
+ name = "windows-targets"
+ version = "0.52.6"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "9b724f72796e036ab90c1021d4780d4d3d648aca59e491e6b98e725b84e99973"
+ dependencies = [
+- "windows_aarch64_gnullvm 0.52.6",
+- "windows_aarch64_msvc 0.52.6",
+- "windows_i686_gnu 0.52.6",
++ "windows_aarch64_gnullvm",
++ "windows_aarch64_msvc",
++ "windows_i686_gnu",
+  "windows_i686_gnullvm",
+- "windows_i686_msvc 0.52.6",
+- "windows_x86_64_gnu 0.52.6",
+- "windows_x86_64_gnullvm 0.52.6",
+- "windows_x86_64_msvc 0.52.6",
++ "windows_i686_msvc",
++ "windows_x86_64_gnu",
++ "windows_x86_64_gnullvm",
++ "windows_x86_64_msvc",
+ ]
+ 
+-[[package]]
+-name = "windows_aarch64_gnullvm"
+-version = "0.48.5"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "2b38e32f0abccf9987a4e3079dfb67dcd799fb61361e53e2882c3cbaf0d905d8"
+-
+ [[package]]
+ name = "windows_aarch64_gnullvm"
+ version = "0.52.6"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "32a4622180e7a0ec044bb555404c800bc9fd9ec262ec147edd5989ccd0c02cd3"
+ 
+-[[package]]
+-name = "windows_aarch64_msvc"
+-version = "0.48.5"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "dc35310971f3b2dbbf3f0690a219f40e2d9afcf64f9ab7cc1be722937c26b4bc"
+-
+ [[package]]
+ name = "windows_aarch64_msvc"
+ version = "0.52.6"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "09ec2a7bb152e2252b53fa7803150007879548bc709c039df7627cabbd05d469"
+ 
+-[[package]]
+-name = "windows_i686_gnu"
+-version = "0.48.5"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "a75915e7def60c94dcef72200b9a8e58e5091744960da64ec734a6c6e9b3743e"
+-
+ [[package]]
+ name = "windows_i686_gnu"
+ version = "0.52.6"
+@@ -1327,48 +1201,24 @@ version = "0.52.6"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "0eee52d38c090b3caa76c563b86c3a4bd71ef1a819287c19d586d7334ae8ed66"
+ 
+-[[package]]
+-name = "windows_i686_msvc"
+-version = "0.48.5"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "8f55c233f70c4b27f66c523580f78f1004e8b5a8b659e05a4eb49d4166cca406"
+-
+ [[package]]
+ name = "windows_i686_msvc"
+ version = "0.52.6"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "240948bc05c5e7c6dabba28bf89d89ffce3e303022809e73deaefe4f6ec56c66"
+ 
+-[[package]]
+-name = "windows_x86_64_gnu"
+-version = "0.48.5"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "53d40abd2583d23e4718fddf1ebec84dbff8381c07cae67ff7768bbf19c6718e"
+-
+ [[package]]
+ name = "windows_x86_64_gnu"
+ version = "0.52.6"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "147a5c80aabfbf0c7d901cb5895d1de30ef2907eb21fbbab29ca94c5b08b1a78"
+ 
+-[[package]]
+-name = "windows_x86_64_gnullvm"
+-version = "0.48.5"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "0b7b52767868a23d5bab768e390dc5f5c55825b6d30b86c844ff2dc7414044cc"
+-
+ [[package]]
+ name = "windows_x86_64_gnullvm"
+ version = "0.52.6"
+ source = "registry+https://github.com/rust-lang/crates.io-index"
+ checksum = "24d5b23dc417412679681396f2b49f3de8c1473deb516bd34410872eff51ed0d"
+ 
+-[[package]]
+-name = "windows_x86_64_msvc"
+-version = "0.48.5"
+-source = "registry+https://github.com/rust-lang/crates.io-index"
+-checksum = "ed94fce61571a4006852b7389a063ab983c02eb1bb37b47f8272ce92d06d9538"
+-
+ [[package]]
+ name = "windows_x86_64_msvc"
+ version = "0.52.6"
+diff --git a/Cargo.toml b/Cargo.toml
+index 664755c..ffaaa9a 100644
+--- a/Cargo.toml
++++ b/Cargo.toml
+@@ -32,7 +32,6 @@ path = "src/bin/tuned-rs-gui.rs"
+ [dependencies]
+ tokio = { version = "1.36", features = ["full"] }
+ zbus = "4.1"
+-tokio-udev = "0.7"
+ anyhow = "1.0"
+ tracing = "0.1"
+ tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+diff --git a/src/monitor.rs b/src/monitor.rs
+index b09256f..1964188 100644
+--- a/src/monitor.rs
++++ b/src/monitor.rs
+@@ -1,51 +1,152 @@
+ use crate::DaemonEvent;
+-use std::thread;
+-use std::time::Duration;
++use std::ffi::{CStr, CString};
++use std::os::fd::RawFd;
++use std::ptr;
+ use tokio::sync::mpsc;
+-use tokio_udev::MonitorBuilder;
+ use tracing::{error, info};
+ 
+-/// Spawns a dedicated thread for libudev because `MonitorSocket` is `!Send`.
++#[link(name = "rustd_device")]
++extern "C" {
++    fn rustd_device_ctx_new() -> *mut libc::c_void;
++    fn rustd_device_ctx_unref(ctx: *mut libc::c_void) -> *mut libc::c_void;
++    fn rustd_device_monitor_new_from_netlink(
++        ctx: *mut libc::c_void,
++        name: *const libc::c_char,
++    ) -> *mut libc::c_void;
++    fn rustd_device_monitor_unref(monitor: *mut libc::c_void) -> *mut libc::c_void;
++    fn rustd_device_monitor_filter_add_match_subsystem_devtype(
++        monitor: *mut libc::c_void,
++        subsystem: *const libc::c_char,
++        devtype: *const libc::c_char,
++    ) -> libc::c_int;
++    fn rustd_device_monitor_enable_receiving(monitor: *mut libc::c_void) -> libc::c_int;
++    fn rustd_device_monitor_get_fd(monitor: *mut libc::c_void) -> libc::c_int;
++    fn rustd_device_monitor_receive_device(monitor: *mut libc::c_void) -> *mut libc::c_void;
++    fn rustd_device_unref(device: *mut libc::c_void) -> *mut libc::c_void;
++    fn rustd_device_get_action(device: *mut libc::c_void) -> *const libc::c_char;
++    fn rustd_device_get_sysname(device: *mut libc::c_void) -> *const libc::c_char;
++}
++
++/// Spawns a dedicated thread for RustD device monitoring (`librustd_device`).
+ pub fn spawn_power_monitor(tx: mpsc::Sender<DaemonEvent>) -> anyhow::Result<()> {
+     std::thread::Builder::new()
+-        .name("tuned-rs-udev".into())
++        .name("tuned-rs-device".into())
+         .spawn(move || {
+-            let mut monitor = match MonitorBuilder::new()
+-                .and_then(|builder| builder.match_subsystem("power_supply"))
+-                .and_then(|builder| builder.listen())
+-            {
+-                Ok(monitor) => monitor,
+-                Err(e) => {
+-                    error!("Failed to start udev power_supply monitor: {e}");
+-                    return;
++            let ctx = unsafe { rustd_device_ctx_new() };
++            if ctx.is_null() {
++                error!("Failed to create rustd_device context");
++                return;
++            }
++
++            let name = CString::new("udev").expect("static");
++            let subsystem = CString::new("power_supply").expect("static");
++            let monitor = unsafe { rustd_device_monitor_new_from_netlink(ctx, name.as_ptr()) };
++            if monitor.is_null() {
++                error!("Failed to create rustd_device monitor");
++                unsafe {
++                    rustd_device_ctx_unref(ctx);
+                 }
++                return;
++            }
++
++            let setup = unsafe {
++                rustd_device_monitor_filter_add_match_subsystem_devtype(
++                    monitor,
++                    subsystem.as_ptr(),
++                    ptr::null(),
++                ) == 0
++                    && rustd_device_monitor_enable_receiving(monitor) == 0
+             };
++            if !setup {
++                error!("Failed to enable rustd_device power_supply monitor");
++                unsafe {
++                    rustd_device_monitor_unref(monitor);
++                    rustd_device_ctx_unref(ctx);
++                }
++                return;
++            }
++
++            let fd: RawFd = unsafe { rustd_device_monitor_get_fd(monitor) };
++            if fd < 0 {
++                error!("rustd_device monitor returned an invalid fd");
++                unsafe {
++                    rustd_device_monitor_unref(monitor);
++                    rustd_device_ctx_unref(ctx);
++                }
++                return;
++            }
++
++            info!("rustd_device monitor listening for ACPI/power_supply events...");
+ 
+-            info!("udev monitor listening for ACPI/power_supply events...");
++            let mut pollfd = libc::pollfd {
++                fd,
++                events: libc::POLLIN,
++                revents: 0,
++            };
+ 
+             loop {
+-                match monitor.next() {
+-                    Some(event) => {
+-                        let action = event
+-                            .action()
+-                            .unwrap_or_default()
+-                            .to_string_lossy()
+-                            .into_owned();
+-                        let device = event.sysname().to_string_lossy().into_owned();
+-
+-                        info!("Hardware Event: [{action}] on {device}");
+-
+-                        if tx
+-                            .blocking_send(DaemonEvent::Hardware { action, device })
+-                            .is_err()
+-                        {
+-                            info!("Event channel closed; stopping udev monitor thread");
+-                            return;
++                let ready = unsafe { libc::poll(&mut pollfd, 1, 250) };
++                if ready < 0 {
++                    let err = std::io::Error::last_os_error();
++                    if err.kind() == std::io::ErrorKind::Interrupted {
++                        continue;
++                    }
++                    error!("rustd_device monitor poll failed: {err}");
++                    break;
++                }
++                if ready == 0 || pollfd.revents == 0 {
++                    continue;
++                }
++
++                loop {
++                    let device = unsafe { rustd_device_monitor_receive_device(monitor) };
++                    if device.is_null() {
++                        break;
++                    }
++
++                    let action = unsafe {
++                        let ptr = rustd_device_get_action(device);
++                        if ptr.is_null() {
++                            String::new()
++                        } else {
++                            CStr::from_ptr(ptr).to_string_lossy().into_owned()
++                        }
++                    };
++                    let device_name = unsafe {
++                        let ptr = rustd_device_get_sysname(device);
++                        if ptr.is_null() {
++                            String::new()
++                        } else {
++                            CStr::from_ptr(ptr).to_string_lossy().into_owned()
+                         }
++                    };
++                    unsafe {
++                        rustd_device_unref(device);
++                    }
++
++                    info!("Hardware Event: [{action}] on {device_name}");
++
++                    if tx
++                        .blocking_send(DaemonEvent::Hardware {
++                            action,
++                            device: device_name,
++                        })
++                        .is_err()
++                    {
++                        info!("Event channel closed; stopping rustd_device monitor thread");
++                        unsafe {
++                            rustd_device_monitor_unref(monitor);
++                            rustd_device_ctx_unref(ctx);
++                        }
++                        return;
+                     }
+-                    None => thread::sleep(Duration::from_millis(250)),
+                 }
+             }
++
++            unsafe {
++                rustd_device_monitor_unref(monitor);
++                rustd_device_ctx_unref(ctx);
++            }
+         })?;
+ 
+     Ok(())
+diff --git a/src/udev_filter.rs b/src/udev_filter.rs
+index 9db77ef..dfa6083 100644
+--- a/src/udev_filter.rs
++++ b/src/udev_filter.rs
+@@ -1,41 +1,119 @@
+ use std::collections::BTreeSet;
++use std::ffi::{CStr, CString};
+ use std::fmt::Write as _;
+ 
+-use anyhow::Result;
++use anyhow::{bail, Result};
+ use regex::Regex;
+-use tokio_udev::Enumerator;
++
++#[link(name = "rustd_device")]
++extern "C" {
++    fn rustd_device_ctx_new() -> *mut libc::c_void;
++    fn rustd_device_ctx_unref(ctx: *mut libc::c_void) -> *mut libc::c_void;
++    fn rustd_device_enumerate_new(ctx: *mut libc::c_void) -> *mut libc::c_void;
++    fn rustd_device_enumerate_unref(enumerate: *mut libc::c_void) -> *mut libc::c_void;
++    fn rustd_device_enumerate_add_match_subsystem(
++        enumerate: *mut libc::c_void,
++        subsystem: *const libc::c_char,
++    ) -> libc::c_int;
++    fn rustd_device_enumerate_scan_devices(enumerate: *mut libc::c_void) -> libc::c_int;
++    fn rustd_device_enumerate_get_list_entry(enumerate: *mut libc::c_void) -> *mut libc::c_void;
++    fn rustd_device_list_entry_get_next(entry: *mut libc::c_void) -> *mut libc::c_void;
++    fn rustd_device_list_entry_get_name(entry: *mut libc::c_void) -> *const libc::c_char;
++    fn rustd_device_new_from_syspath(
++        ctx: *mut libc::c_void,
++        syspath: *const libc::c_char,
++    ) -> *mut libc::c_void;
++    fn rustd_device_unref(device: *mut libc::c_void) -> *mut libc::c_void;
++    fn rustd_device_get_sysname(device: *mut libc::c_void) -> *const libc::c_char;
++    fn rustd_device_get_properties_list_entry(device: *mut libc::c_void) -> *mut libc::c_void;
++    fn rustd_device_list_entry_get_value(entry: *mut libc::c_void) -> *const libc::c_char;
++}
++
++fn cstr_to_string(ptr: *const libc::c_char) -> Option<String> {
++    if ptr.is_null() {
++        None
++    } else {
++        Some(unsafe { CStr::from_ptr(ptr) }.to_string_lossy().into_owned())
++    }
++}
+ 
+ pub fn matching_names(subsystem: &str, pattern: Option<&str>) -> Result<Vec<String>> {
+     let regex = pattern.map(Regex::new).transpose()?;
+-    let mut enumerator = Enumerator::new()?;
+-    enumerator.match_subsystem(subsystem)?;
+-    let mut names = BTreeSet::new();
+-    for device in enumerator.scan_devices()? {
+-        let rejected = regex.as_ref().is_some_and(|regex| {
+-            let mut properties = device
+-                .properties()
+-                .filter_map(|property| {
+-                    Some((
+-                        property.name().to_str()?.to_string(),
+-                        property.value().to_str()?.to_string(),
+-                    ))
+-                })
+-                .collect::<Vec<_>>();
+-            properties.sort_unstable();
+-            let text = properties
+-                .into_iter()
+-                .fold(String::new(), |mut text, (name, value)| {
+-                    let _ = writeln!(text, "{name}={value}");
+-                    text
+-                });
+-            !regex.is_match(&text)
+-        });
+-        if rejected {
+-            continue;
++    let subsystem = CString::new(subsystem)?;
++
++    let ctx = unsafe { rustd_device_ctx_new() };
++    if ctx.is_null() {
++        bail!("rustd_device_ctx_new failed");
++    }
++    let enumerate = unsafe { rustd_device_enumerate_new(ctx) };
++    if enumerate.is_null() {
++        unsafe {
++            rustd_device_ctx_unref(ctx);
+         }
+-        if let Some(name) = device.sysname().to_str() {
+-            names.insert(name.to_string());
++        bail!("rustd_device_enumerate_new failed");
++    }
++
++    let ok = unsafe {
++        rustd_device_enumerate_add_match_subsystem(enumerate, subsystem.as_ptr()) == 0
++            && rustd_device_enumerate_scan_devices(enumerate) == 0
++    };
++    if !ok {
++        unsafe {
++            rustd_device_enumerate_unref(enumerate);
++            rustd_device_ctx_unref(ctx);
++        }
++        bail!("rustd_device enumerate scan failed");
++    }
++
++    let mut names = BTreeSet::new();
++    let mut entry = unsafe { rustd_device_enumerate_get_list_entry(enumerate) };
++    while !entry.is_null() {
++        let syspath = unsafe { rustd_device_list_entry_get_name(entry) };
++        if let Some(syspath) = cstr_to_string(syspath) {
++            if let Ok(syspath_c) = CString::new(syspath) {
++                let device = unsafe { rustd_device_new_from_syspath(ctx, syspath_c.as_ptr()) };
++                if !device.is_null() {
++                    let rejected = regex.as_ref().is_some_and(|regex| {
++                        let mut properties = Vec::new();
++                        let mut prop = unsafe { rustd_device_get_properties_list_entry(device) };
++                        while !prop.is_null() {
++                            if let (Some(name), Some(value)) = (
++                                cstr_to_string(unsafe { rustd_device_list_entry_get_name(prop) }),
++                                cstr_to_string(unsafe { rustd_device_list_entry_get_value(prop) }),
++                            ) {
++                                properties.push((name, value));
++                            }
++                            prop = unsafe { rustd_device_list_entry_get_next(prop) };
++                        }
++                        properties.sort_unstable();
++                        let text = properties.into_iter().fold(
++                            String::new(),
++                            |mut text, (name, value)| {
++                                let _ = writeln!(text, "{name}={value}");
++                                text
++                            },
++                        );
++                        !regex.is_match(&text)
++                    });
++                    if !rejected {
++                        if let Some(name) =
++                            cstr_to_string(unsafe { rustd_device_get_sysname(device) })
++                        {
++                            names.insert(name);
++                        }
++                    }
++                    unsafe {
++                        rustd_device_unref(device);
++                    }
++                }
++            }
+         }
++        entry = unsafe { rustd_device_list_entry_get_next(entry) };
++    }
++
++    unsafe {
++        rustd_device_enumerate_unref(enumerate);
++        rustd_device_ctx_unref(ctx);
+     }
+     Ok(names.into_iter().collect())
+ }

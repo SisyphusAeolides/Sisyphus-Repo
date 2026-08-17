@@ -1,67 +1,337 @@
 #!/bin/bash
 # SPDX-License-Identifier: LGPL-2.1-or-later
-# Rewrite the primary bootloader entry to exclusive RustD PID1.
-set -euo pipefail
+# Transactionally select RustD as PID1 while retaining a verified rollback entry.
+set -Eeuo pipefail
+umask 077
 
+ACTION="${1:-apply}"
+STATE_DIR="${RUSTD_MIGRATION_STATE:-/var/lib/rustd/packaging/v1}"
 CONF="${RUSTD_BOOT_CONF:-/usr/lib/rustd/boot/rustd-boot-entry.conf}"
 LOADER_DIR="${RUSTD_LOADER_ENTRIES:-/boot/loader/entries}"
+LIMINE_CONF="${RUSTD_LIMINE_CONF:-/boot/limine.conf}"
+GRUB_DIR="${RUSTD_GRUB_DIR:-/etc/grub.d}"
+GRUB_CONFIG="${RUSTD_GRUB_CONFIG:-/boot/grub/grub.cfg}"
+GRUB_MKCONFIG="${RUSTD_GRUB_MKCONFIG:-grub-mkconfig}"
+BOOT_STATE="$STATE_DIR/boot"
+TRANSACTIONS="$STATE_DIR/transactions"
+TXN=
+APPLY_COMPLETE=0
 
-if [[ ! -r "$CONF" ]]; then
-  echo "rustd-configure-boot: missing $CONF" >&2
+die() {
+  echo "rustd-configure-boot: $*" >&2
   exit 1
-fi
-
-rewrite_options() {
-  local line="$1"
-  local opts="${line#options}"
-  opts="$(echo "$opts" | sed -E 's/(^|[[:space:]])init=[^[:space:]]+//g')"
-  opts="$(echo "$opts" | sed -E 's/(^|[[:space:]])rustd\.unit=[^[:space:]]+//g')"
-  echo "options${opts} init=/usr/lib/rustd/rustd rustd.unit=default.target"
 }
 
-if [[ -d "$LOADER_DIR" ]]; then
-  base_entry="$(ls -1t "$LOADER_DIR"/*.conf 2>/dev/null | grep -v rustd-certification | head -n1 || true)"
-  if [[ -z "$base_entry" ]]; then
-    echo "rustd-configure-boot: no existing loader entries to rewrite" >&2
-    exit 0
+atomic_copy() {
+  local source="$1" target="$2" tmp="${2}.rustd.tmp"
+  cp -a -- "$source" "$tmp"
+  mv -f -- "$tmp" "$target"
+}
+
+write_state() {
+  local name="$1" value="$2" tmp
+  tmp="$BOOT_STATE/${name}.tmp"
+  printf '%s\n' "$value" >"$tmp"
+  mv -f -- "$tmp" "$BOOT_STATE/$name"
+}
+
+rewrite_options() {
+  local line="$1" opts="${line#options}"
+  opts="$(printf '%s\n' "$opts" | sed -E \
+    -e 's/(^|[[:space:]])init=[^[:space:]]+//g' \
+    -e 's/(^|[[:space:]])rustd\.unit=[^[:space:]]+//g')"
+  printf 'options%s init=/usr/lib/rustd/rustd rustd.unit=default.target\n' "$opts"
+}
+
+verify_loader_rollback() {
+  local entry="$1"
+  [[ -s "$entry" ]] || die "rollback entry is empty: $entry"
+  grep -Eq '^[[:space:]]*(linux|efi)[[:space:]]+' "$entry" \
+    || die "rollback entry has no kernel/EFI image: $entry"
+  ! grep -Eq '(^|[[:space:]])init=/usr/lib/rustd/rustd([[:space:]]|$)' "$entry" \
+    || die "rollback entry still selects RustD: $entry"
+}
+
+begin_transaction() {
+  local id
+  id="$(date -u +%Y%m%dT%H%M%SZ)-$$"
+  TXN="$TRANSACTIONS/$id"
+  mkdir -p "$TXN" "$BOOT_STATE"
+  printf 'preparing\n' >"$TXN/status"
+  printf '%s\n' "$id" >"$STATE_DIR/current-transaction"
+}
+
+complete_transaction() {
+  printf 'applied\n' >"$TXN/status"
+  APPLY_COMPLETE=1
+}
+
+rollback_incomplete_transaction() {
+  local rc=$?
+  [[ "$ACTION" == apply && "$APPLY_COMPLETE" == 0 && -n "$TXN" ]] || return "$rc"
+  trap - EXIT
+  if [[ -f "$TXN/boot-kind-target" ]]; then
+    local kind target
+    {
+      IFS= read -r kind
+      IFS= read -r target
+    } <"$TXN/boot-kind-target"
+    if [[ -f "$TXN/boot-before" ]]; then
+      atomic_copy "$TXN/boot-before" "$target" || true
+    elif [[ -f "$TXN/boot-before-absent" ]]; then
+      rm -f -- "$target"
+    fi
+    if [[ -f "$TXN/rollback-target" ]]; then
+      local rollback_target
+      rollback_target="$(<"$TXN/rollback-target")"
+      if [[ -f "$TXN/rollback-before" ]]; then
+        atomic_copy "$TXN/rollback-before" "$rollback_target" || true
+      else
+        rm -f -- "$rollback_target"
+      fi
+    fi
+    [[ "$kind" != grub ]] || regenerate_grub >/dev/null 2>&1 || true
   fi
-  tmp="${base_entry}.rustd.tmp"
+  printf 'failed\n' >"$TXN/status"
+  echo "rustd-configure-boot: failed transaction rolled back" >&2
+  return "$rc"
+}
+
+apply_loader() {
+  local base rollback original tmp options_seen=0
+  base="$(printf '%s\n' "$LOADER_DIR"/*.conf | grep -Ev '/rustd-(rollback|certification)\.conf$' | while read -r entry; do
+    [[ -f "$entry" ]] && printf '%s\t%s\n' "$(stat -c %Y "$entry")" "$entry"
+  done | sort -rn | awk 'NR == 1 { print $2 }')"
+  [[ -n "$base" && -f "$base" ]] || die "no loader entry is available to migrate"
+
+  original="$BOOT_STATE/loader-original.conf"
+  if [[ ! -e "$original" ]]; then
+    atomic_copy "$base" "$original"
+    write_state loader-target "$base"
+  elif [[ "$(<"$BOOT_STATE/loader-target")" != "$base" ]]; then
+    die "loader target changed since the initial migration"
+  fi
+  atomic_copy "$base" "$TXN/boot-before"
+  printf 'loader\n%s\n' "$base" >"$TXN/boot-kind-target"
+
+  rollback="$LOADER_DIR/rustd-rollback.conf"
+  printf '%s\n' "$rollback" >"$TXN/rollback-target"
+  [[ ! -e "$rollback" ]] || atomic_copy "$rollback" "$TXN/rollback-before"
+  atomic_copy "$original" "$rollback"
+  verify_loader_rollback "$rollback"
+
+  tmp="${base}.rustd.tmp"
   {
-    echo "# Rewritten by rustd-configure-boot — exclusive RustD PID1"
-    while IFS= read -r line; do
+    echo "# Managed by rustd-configure-boot; rollback: rustd-rollback.conf"
+    while IFS= read -r line || [[ -n "$line" ]]; do
       case "$line" in
         options*)
           rewrite_options "$line"
+          options_seen=1
+          ;;
+        '# Managed by rustd-configure-boot;'*)
           ;;
         *)
-          echo "$line"
+          printf '%s\n' "$line"
           ;;
       esac
-    done <"$base_entry"
+    done <"$base"
   } >"$tmp"
-  mv "$tmp" "$base_entry"
-  # Remove obsolete side-by-side certification entry if present.
-  rm -f "$LOADER_DIR/rustd-certification.conf" \
-        "$LOADER_DIR/.rustd-systemd-rollback"
-  echo "rustd-configure-boot: rewrote $base_entry for exclusive RustD"
-  exit 0
-fi
+  (( options_seen == 1 )) || { rm -f "$tmp"; die "loader entry has no options line: $base"; }
+  chmod --reference="$base" "$tmp"
+  chown --reference="$base" "$tmp"
+  mv -f -- "$tmp" "$base"
+  grep -Fq 'init=/usr/lib/rustd/rustd' "$base" || die "failed to select RustD in $base"
+  write_state kind loader
+  write_state applied-sha256 "$(sha256sum "$base" | awk '{print $1}')"
+  echo "rustd-configure-boot: selected RustD in $base; rollback is $rollback"
+}
 
-GRUB_DIR="${RUSTD_GRUB_DIR:-/etc/grub.d}"
-if [[ -d "$GRUB_DIR" ]]; then
-  rm -f "$GRUB_DIR/09_rustd_certification"
-  install -Dm755 /dev/stdin "$GRUB_DIR/08_rustd_exclusive" <<'EOF'
+extract_limine_rollback() {
+  local source="$1" output="$2"
+  awk '
+    /^[[:space:]]*\/[^\/]/ {
+      if (seen) exit
+      seen=1
+      print "/RustD rollback (pre-migration)"
+      next
+    }
+    seen && /^[[:space:]]*\/\// { exit }
+    seen { print }
+    END { if (!seen) exit 1 }
+  ' "$source" >"$output"
+}
+
+apply_limine() {
+  local original="$BOOT_STATE/limine-original.conf"
+  local rollback="${RUSTD_LIMINE_ROLLBACK:-$(dirname "$LIMINE_CONF")/rustd-rollback.conf}"
+  local tmp="${LIMINE_CONF}.rustd.tmp" in_primary=0 options_seen=0
+  if [[ ! -e "$original" ]]; then
+    atomic_copy "$LIMINE_CONF" "$original"
+    write_state limine-target "$LIMINE_CONF"
+    write_state limine-rollback "$rollback"
+  elif [[ "$(<"$BOOT_STATE/limine-target")" != "$LIMINE_CONF" ]]; then
+    die "Limine target changed since the initial migration"
+  fi
+  atomic_copy "$LIMINE_CONF" "$TXN/boot-before"
+  printf 'limine\n%s\n' "$LIMINE_CONF" >"$TXN/boot-kind-target"
+  printf '%s\n' "$rollback" >"$TXN/rollback-target"
+  [[ ! -e "$rollback" ]] || atomic_copy "$rollback" "$TXN/rollback-before"
+  extract_limine_rollback "$original" "$rollback"
+  grep -Eq '^[[:space:]]*(protocol|path|kernel_path):' "$rollback" \
+    || die "Limine rollback entry has no boot protocol or image"
+  ! grep -Fq 'init=/usr/lib/rustd/rustd' "$rollback" \
+    || die "Limine rollback entry still selects RustD"
+
+  while IFS= read -r line || [[ -n "$line" ]]; do
+    if [[ "$line" =~ ^[[:space:]]*/[^/] ]]; then
+      if (( in_primary == 0 )); then in_primary=1; else in_primary=2; fi
+    fi
+    if (( in_primary == 1 )) && [[ "$line" =~ ^([[:space:]]*)cmdline:[[:space:]]*(.*)$ ]]; then
+      options="$(printf '%s\n' "${BASH_REMATCH[2]}" | sed -E \
+        -e 's/(^|[[:space:]])init=[^[:space:]]+//g' \
+        -e 's/(^|[[:space:]])rustd\.unit=[^[:space:]]+//g')"
+      printf '%scmdline: %s init=/usr/lib/rustd/rustd rustd.unit=default.target\n' \
+        "${BASH_REMATCH[1]}" "$options"
+      options_seen=1
+    else
+      printf '%s\n' "$line"
+    fi
+  done <"$LIMINE_CONF" >"$tmp"
+  (( options_seen == 1 )) || { rm -f "$tmp"; die "primary Limine entry has no cmdline"; }
+  # Idempotent: drop any previously appended RustD rollback blocks before rewrite.
+  if grep -Fq '/RustD rollback (pre-migration)' "$tmp"; then
+    awk '
+      BEGIN { skip=0 }
+      $0 ~ /^\/RustD rollback \(pre-migration\)/ { skip=1; next }
+      skip && $0 ~ /^\// { skip=0 }
+      skip { next }
+      { print }
+    ' "$tmp" >"${tmp}.scrub"
+    mv -f -- "${tmp}.scrub" "$tmp"
+  fi
+  if ! grep -Fq '/RustD rollback (pre-migration)' "$tmp"; then
+    printf '\n' >>"$tmp"
+    cat "$rollback" >>"$tmp"
+  fi
+  chmod --reference="$LIMINE_CONF" "$tmp"
+  chown --reference="$LIMINE_CONF" "$tmp"
+  mv -f -- "$tmp" "$LIMINE_CONF"
+  grep -Fq 'init=/usr/lib/rustd/rustd' "$LIMINE_CONF" || die "failed to select RustD in Limine"
+  write_state kind limine
+  write_state applied-sha256 "$(sha256sum "$LIMINE_CONF" | awk '{print $1}')"
+  echo "rustd-configure-boot: selected RustD in Limine; rollback entry preserved"
+}
+
+regenerate_grub() {
+  command -v "$GRUB_MKCONFIG" >/dev/null 2>&1 \
+    || die "grub-mkconfig is required but unavailable"
+  "$GRUB_MKCONFIG" -o "$GRUB_CONFIG"
+}
+
+apply_grub() {
+  local snippet="$GRUB_DIR/08_rustd_exclusive" original="$BOOT_STATE/grub-original"
+  if [[ ! -e "$BOOT_STATE/grub-original-recorded" ]]; then
+    if [[ -e "$snippet" ]]; then atomic_copy "$snippet" "$original"; else : >"$BOOT_STATE/grub-original-absent"; fi
+    : >"$BOOT_STATE/grub-original-recorded"
+  fi
+  if [[ -e "$snippet" ]]; then atomic_copy "$snippet" "$TXN/boot-before"; else : >"$TXN/boot-before-absent"; fi
+  printf 'grub\n%s\n' "$snippet" >"$TXN/boot-kind-target"
+  local kernel initrd
+  kernel="$(basename "$(echo /boot/vmlinuz-* | awk '{print $1}')")"
+  [[ -n "$kernel" && -e "/boot/$kernel" ]] || die "unable to discover /boot/vmlinuz-*"
+  local suffix="${kernel#vmlinuz-}"
+  if [[ -e "/boot/initramfs-${suffix}.img" ]]; then
+    initrd="initramfs-${suffix}.img"
+  elif [[ -e /boot/initramfs-linux.img ]]; then
+    initrd="initramfs-linux.img"
+  else
+    die "unable to discover initramfs for $kernel"
+  fi
+  install -Dm755 /dev/stdin "$snippet" <<EOF
 #!/bin/sh
-exec tail -n +3 $0
-# Exclusive RustD boot — stock systemd entry must not remain default.
-menuentry 'RustD' --class rustd {
-  linux /vmlinuz-linux init=/usr/lib/rustd/rustd rustd.unit=default.target
-  initrd /initramfs-linux.img
+exec tail -n +3 "\$0"
+# RustD is the production default; generated stock entries remain rollback.
+menuentry 'RustD (exclusive)' --class rustd {
+  linux /$kernel init=/usr/lib/rustd/rustd rustd.unit=default.target
+  initrd /$initrd
 }
 EOF
-  echo "rustd-configure-boot: installed exclusive GRUB snippet $GRUB_DIR/08_rustd_exclusive"
-  exit 0
-fi
+  regenerate_grub
+  grep -Fq 'RustD (exclusive)' "$GRUB_CONFIG" || die "generated GRUB config lacks RustD entry"
+  awk '/^menuentry / && $0 !~ /RustD \(exclusive\)/ { found=1 } END { exit !found }' "$GRUB_CONFIG" \
+    || die "generated GRUB config lacks a rollback entry"
+  write_state kind grub
+  write_state applied-sha256 "$(sha256sum "$snippet" | awk '{print $1}')"
+  echo "rustd-configure-boot: installed RustD GRUB entry and verified a stock rollback"
+}
 
-echo "rustd-configure-boot: no bootloader entries directory; skip" >&2
-exit 0
+restore_boot() {
+  [[ -f "$BOOT_STATE/kind" ]] || { echo "rustd-configure-boot: boot state already restored"; return 0; }
+  local kind target original applied current
+  kind="$(<"$BOOT_STATE/kind")"
+  applied="$(<"$BOOT_STATE/applied-sha256")"
+  case "$kind" in
+    loader)
+      target="$(<"$BOOT_STATE/loader-target")"
+      original="$BOOT_STATE/loader-original.conf"
+      ;;
+    limine)
+      target="$(<"$BOOT_STATE/limine-target")"
+      original="$BOOT_STATE/limine-original.conf"
+      ;;
+    grub)
+      target="$GRUB_DIR/08_rustd_exclusive"
+      original="$BOOT_STATE/grub-original"
+      ;;
+    *) die "unknown saved bootloader kind: $kind" ;;
+  esac
+  if [[ -e "$target" ]]; then
+    current="$(sha256sum "$target" | awk '{print $1}')"
+    if [[ "$current" != "$applied" ]] && { [[ ! -e "$original" ]] || ! cmp -s "$target" "$original"; }; then
+      die "refusing to overwrite boot configuration changed after RustD migration: $target"
+    fi
+  fi
+  if [[ -e "$original" ]]; then
+    atomic_copy "$original" "$target"
+  else
+    rm -f -- "$target"
+  fi
+  case "$kind" in
+    loader) rm -f -- "$LOADER_DIR/rustd-rollback.conf" ;;
+    limine) rm -f -- "$(<"$BOOT_STATE/limine-rollback")" ;;
+    grub) regenerate_grub ;;
+  esac
+  rm -f -- "$BOOT_STATE/kind" "$BOOT_STATE/applied-sha256"
+  echo "rustd-configure-boot: restored pre-RustD boot configuration"
+}
+
+case "$ACTION" in
+  apply)
+    trap rollback_incomplete_transaction EXIT
+    [[ -r "$CONF" ]] || die "missing $CONF"
+    mkdir -p "$STATE_DIR"
+    if [[ -e "$STATE_DIR/schema-version" ]] && [[ "$(<"$STATE_DIR/schema-version")" != 1 ]]; then
+      die "unsupported migration state version"
+    fi
+    printf '1\n' >"$STATE_DIR/schema-version"
+    begin_transaction
+    if [[ -d "$LOADER_DIR" ]]; then
+      apply_loader
+    elif [[ -f "$LIMINE_CONF" ]]; then
+      apply_limine
+    elif [[ -d "$GRUB_DIR" ]]; then
+      apply_grub
+    else
+      die "no supported bootloader configuration found"
+    fi
+    complete_transaction
+    trap - EXIT
+    ;;
+  restore)
+    restore_boot
+    ;;
+  *)
+    die "usage: $0 [apply|restore]"
+    ;;
+esac

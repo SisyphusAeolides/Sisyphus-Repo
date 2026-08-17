@@ -1,0 +1,75 @@
+diff --git a/Makefile b/Makefile
+index dc30d53..c7dbcac 100644
+--- a/Makefile
++++ b/Makefile
+@@ -44,13 +44,17 @@ packaging-check:
+ 	test -f packaging/elan-guardian.8
+ 	grep -q '^Version:[[:space:]]*$(VERSION)$$' elan-guardian.spec
+ 	grep -q 'ExecStop=/usr/bin/elan-guardian recover --all --affected-only --quiet' systemd/elan-guardian-resume.service
+-	grep -q 'ConditionPathExists=!/usr/lib/systemd/system/libinput-rs-elan-resume.service' systemd/elan-guardian-resume.service
++	grep -q 'ConditionPathExists=!/usr/lib/rustd/system/libinput-rs-elan-resume.service' systemd/elan-guardian-resume.service
++	grep -q 'After=rustd-udev-settle.service' systemd/elan-guardian-module.service
++	grep -q 'After=rustd-udev-settle.service elan-guardian-module.service' systemd/elan-guardian-watch.service
++	grep -q 'After=rustd-udev-settle.service elan-guardian-module.service' systemd/elan-i2c-recover.service
+ 	grep -q 'ExecStart=/usr/bin/elan-guardian activate-module --affected-only' systemd/elan-guardian-module.service
+ 	grep -q 'Wants=elan-guardian-module.service' systemd/elan-guardian-watch.service
+ 	grep -q 'ExecStart=/usr/bin/elan-guardian watch --affected-only --interval-ms 50' systemd/elan-guardian-watch.service
+ 	grep -q 'ExecStart=-/usr/bin/sh -c' systemd/elan-i2c-recover.service
+ 	grep -q 'KERNEL=="13-0015"' systemd/99-elan-i2c-recover.rules
+ 	grep -q 'ExecStart=/usr/bin/elan-guardian watch --affected-only --interval-ms 50' systemd/elan-guardian-watch.service.d/50-interval.conf
++	! grep -R -E -q 'systemd-udev-settle|/usr/lib/systemd/system' systemd
+ 	grep -q '^PACKAGE_VERSION="$(VERSION)"$$' dkms.conf
+ 	grep -q '^elan-guardian ($(VERSION)-1~ppa1~ubuntu26.04.1)' debian/changelog
+ 
+diff --git a/systemd/elan-guardian-module.service b/systemd/elan-guardian-module.service
+index 32ee2ad..7feb0bc 100644
+--- a/systemd/elan-guardian-module.service
++++ b/systemd/elan-guardian-module.service
+@@ -1,7 +1,7 @@
+ [Unit]
+ Description=Activate the installed ELAN recovery kernel module
+ Documentation=man:elan-guardian(8)
+-After=systemd-modules-load.service systemd-udev-settle.service
++After=rustd-udev-settle.service
+ Before=elan-guardian-watch.service
+ PartOf=elan-guardian-watch.service
+ 
+diff --git a/systemd/elan-guardian-resume.service b/systemd/elan-guardian-resume.service
+index 6e4a29f..b6e7f4a 100644
+--- a/systemd/elan-guardian-resume.service
++++ b/systemd/elan-guardian-resume.service
+@@ -4,7 +4,7 @@ Documentation=man:elan-guardian(8)
+ DefaultDependencies=no
+ Before=sleep.target
+ StopWhenUnneeded=yes
+-ConditionPathExists=!/usr/lib/systemd/system/libinput-rs-elan-resume.service
++ConditionPathExists=!/usr/lib/rustd/system/libinput-rs-elan-resume.service
+ 
+ [Service]
+ Type=oneshot
+diff --git a/systemd/elan-guardian-watch.service b/systemd/elan-guardian-watch.service
+index 69d74af..831bd74 100644
+--- a/systemd/elan-guardian-watch.service
++++ b/systemd/elan-guardian-watch.service
+@@ -2,7 +2,7 @@
+ Description=Recover stalled ELAN kernel and libinput consumers
+ Documentation=man:elan-guardian(8)
+ Wants=elan-guardian-module.service
+-After=systemd-udev-settle.service elan-guardian-module.service
++After=rustd-udev-settle.service elan-guardian-module.service
+ ConditionPathExists=/sys/bus/i2c/drivers/elan_i2c
+ 
+ [Service]
+diff --git a/systemd/elan-i2c-recover.service b/systemd/elan-i2c-recover.service
+index 884d6ba..0558cee 100644
+--- a/systemd/elan-i2c-recover.service
++++ b/systemd/elan-i2c-recover.service
+@@ -1,7 +1,7 @@
+ [Unit]
+ Description=Rebind ELAN I2C touchpad after input stall or cursor freeze
+ Documentation=man:elan-guardian(8)
+-After=systemd-udev-settle.service elan-guardian-module.service
++After=rustd-udev-settle.service elan-guardian-module.service
+ Wants=elan-guardian-module.service
+ 
+ [Service]

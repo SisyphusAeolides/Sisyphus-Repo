@@ -1,0 +1,236 @@
+diff --git a/Makefile b/Makefile
+index 1a51e9d..00646ed 100644
+--- a/Makefile
++++ b/Makefile
+@@ -84,6 +84,8 @@ packaging-check:
+ 	grep -Fq 'libwacom = []' Cargo.toml
+ 	grep -Fq '#[cfg(feature = "libwacom")]' src/backend.rs
+ 	grep -Fq 'native_libraries+=(-lwacom)' build-shared.sh
++	grep -Fq 'native_libraries=(-lrustd_device)' build-shared.sh
++	! grep -Fq 'native_libraries=(-ludev)' build-shared.sh
+ 	grep -Fq '%if 0%{?fedora}' libinput-rs.spec
+ 	grep -Fq '%global cargo_features --features libwacom' libinput-rs.spec
+ 	grep -Fq 'BuildRequires:  libwacom-devel >= 2.18' libinput-rs.spec
+@@ -234,8 +236,8 @@ install: all upstream-tools
+ 	install -Dm644 packaging/80-libinput-device-groups.rules $(DESTDIR)$(PREFIX)/lib/udev/rules.d/80-libinput-device-groups.rules
+ 	install -Dm644 packaging/90-libinput-fuzz-override.rules $(DESTDIR)$(PREFIX)/lib/udev/rules.d/90-libinput-fuzz-override.rules
+ 	install -Dm644 packaging/90-libinput-rs-elantech-crc.rules $(DESTDIR)$(PREFIX)/lib/udev/rules.d/90-libinput-rs-elantech-crc.rules
+-	install -Dm644 systemd/libinput-rs-elan-resume.service $(DESTDIR)$(PREFIX)/lib/systemd/system/libinput-rs-elan-resume.service
+-	install -Dm644 systemd/91-libinput-rs-elan.preset $(DESTDIR)$(PREFIX)/lib/systemd/system-preset/91-libinput-rs-elan.preset
++	install -Dm644 systemd/libinput-rs-elan-resume.service $(DESTDIR)$(PREFIX)/lib/rustd/system/libinput-rs-elan-resume.service
++	install -Dm644 systemd/91-libinput-rs-elan.preset $(DESTDIR)$(PREFIX)/lib/rustd/system-preset/91-libinput-rs-elan.preset
+ 	install -d $(DESTDIR)$(PREFIX)/share/libinput
+ 	install -m644 quirks/*.quirks $(DESTDIR)$(PREFIX)/share/libinput/
+ 	install -Dm755 target/release/libinput.so $(DESTDIR)$(LIBDIR)/libinput.so.10.13.0
+diff --git a/build-shared.sh b/build-shared.sh
+index f216639..1b8949a 100755
+--- a/build-shared.sh
++++ b/build-shared.sh
+@@ -13,7 +13,7 @@ if [[ -n ${RPM_LD_FLAGS:-} ]]; then
+   read -r -a link_flags <<<"${RPM_LD_FLAGS}"
+ fi
+ 
+-native_libraries=(-ludev)
++native_libraries=(-lrustd_device)
+ if nm -u target/release/libinput.a 2>/dev/null | grep '_gfortran_' >/dev/null; then
+   native_libraries+=(-lgfortran)
+ fi
+diff --git a/src/udev.rs b/src/udev.rs
+index c067da3..094da86 100644
+--- a/src/udev.rs
++++ b/src/udev.rs
+@@ -2,34 +2,46 @@ use std::ffi::{CStr, CString};
+ use std::os::unix::fs::MetadataExt;
+ use std::path::Path;
+ 
+-#[link(name = "udev")]
++// Opaque device handle returned by librustd_device. Kept as `*mut c_void` so the
++// existing libinput ABI shape (`libinput_device_get_udev_device`) continues to
++// compile while linking the native RustD device library instead of libudev.
++#[link(name = "rustd_device")]
+ extern "C" {
+-    fn udev_new() -> *mut libc::c_void;
+-    fn udev_unref(udev: *mut libc::c_void) -> *mut libc::c_void;
+-    fn udev_device_new_from_devnum(
+-        udev: *mut libc::c_void,
++    fn rustd_device_ctx_new() -> *mut libc::c_void;
++    fn rustd_device_ctx_unref(ctx: *mut libc::c_void) -> *mut libc::c_void;
++    fn rustd_device_new_from_devnum(
++        ctx: *mut libc::c_void,
+         device_type: libc::c_char,
+         device_number: libc::dev_t,
+     ) -> *mut libc::c_void;
+-    pub fn udev_device_ref(device: *mut libc::c_void) -> *mut libc::c_void;
+-    pub fn udev_device_unref(device: *mut libc::c_void) -> *mut libc::c_void;
+-    fn udev_device_get_property_value(
++    pub fn rustd_device_ref(device: *mut libc::c_void) -> *mut libc::c_void;
++    pub fn rustd_device_unref(device: *mut libc::c_void) -> *mut libc::c_void;
++    fn rustd_device_get_property_value(
+         device: *mut libc::c_void,
+         key: *const libc::c_char,
+     ) -> *const libc::c_char;
+-    fn udev_device_get_syspath(device: *mut libc::c_void) -> *const libc::c_char;
++    fn rustd_device_get_syspath(device: *mut libc::c_void) -> *const libc::c_char;
++}
++
++/// Compatibility wrappers used by the historical libinput call sites.
++pub unsafe fn udev_device_ref(device: *mut libc::c_void) -> *mut libc::c_void {
++    rustd_device_ref(device)
++}
++
++pub unsafe fn udev_device_unref(device: *mut libc::c_void) -> *mut libc::c_void {
++    rustd_device_unref(device)
+ }
+ 
+ pub unsafe fn device_from_path(path: &Path) -> *mut libc::c_void {
+     let Ok(metadata) = path.metadata() else {
+         return std::ptr::null_mut();
+     };
+-    let udev = udev_new();
+-    if udev.is_null() {
++    let ctx = rustd_device_ctx_new();
++    if ctx.is_null() {
+         return std::ptr::null_mut();
+     }
+-    let device = udev_device_new_from_devnum(udev, b'c' as libc::c_char, metadata.rdev());
+-    udev_unref(udev);
++    let device = rustd_device_new_from_devnum(ctx, b'c' as libc::c_char, metadata.rdev());
++    rustd_device_ctx_unref(ctx);
+     device
+ }
+ 
+@@ -59,7 +71,7 @@ impl Drop for UdevDevice {
+     fn drop(&mut self) {
+         if !self.pointer.is_null() {
+             unsafe {
+-                udev_device_unref(self.pointer);
++                rustd_device_unref(self.pointer);
+             }
+         }
+     }
+@@ -70,7 +82,7 @@ pub unsafe fn property_value(device: *mut libc::c_void, key: &str) -> Option<Str
+         return None;
+     }
+     let key = CString::new(key).ok()?;
+-    let value = udev_device_get_property_value(device, key.as_ptr());
++    let value = rustd_device_get_property_value(device, key.as_ptr());
+     (!value.is_null()).then(|| CStr::from_ptr(value).to_string_lossy().into_owned())
+ }
+ 
+@@ -80,7 +92,7 @@ pub fn syspath_from_path(path: &Path) -> Option<std::path::PathBuf> {
+         if device.as_ptr().is_null() {
+             return None;
+         }
+-        let syspath = udev_device_get_syspath(device.as_ptr());
++        let syspath = rustd_device_get_syspath(device.as_ptr());
+         (!syspath.is_null()).then(|| {
+             std::path::PathBuf::from(CStr::from_ptr(syspath).to_string_lossy().into_owned())
+         })
+diff --git a/src/udev_callout.rs b/src/udev_callout.rs
+index 1ba4d56..5af093e 100644
+--- a/src/udev_callout.rs
++++ b/src/udev_callout.rs
+@@ -3,22 +3,22 @@ use std::ffi::{CStr, CString};
+ use std::os::fd::AsRawFd;
+ use std::path::Path;
+ 
+-#[link(name = "udev")]
++#[link(name = "rustd_device")]
+ extern "C" {
+-    fn udev_new() -> *mut libc::c_void;
+-    fn udev_unref(udev: *mut libc::c_void) -> *mut libc::c_void;
+-    fn udev_device_new_from_syspath(
+-        udev: *mut libc::c_void,
++    fn rustd_device_ctx_new() -> *mut libc::c_void;
++    fn rustd_device_ctx_unref(ctx: *mut libc::c_void) -> *mut libc::c_void;
++    fn rustd_device_new_from_syspath(
++        ctx: *mut libc::c_void,
+         syspath: *const libc::c_char,
+     ) -> *mut libc::c_void;
+-    fn udev_device_unref(device: *mut libc::c_void) -> *mut libc::c_void;
+-    fn udev_device_get_devnode(device: *mut libc::c_void) -> *const libc::c_char;
+-    fn udev_device_get_parent(device: *mut libc::c_void) -> *mut libc::c_void;
+-    fn udev_device_get_property_value(
++    fn rustd_device_unref(device: *mut libc::c_void) -> *mut libc::c_void;
++    fn rustd_device_get_devnode(device: *mut libc::c_void) -> *const libc::c_char;
++    fn rustd_device_get_parent(device: *mut libc::c_void) -> *mut libc::c_void;
++    fn rustd_device_get_property_value(
+         device: *mut libc::c_void,
+         key: *const libc::c_char,
+     ) -> *const libc::c_char;
+-    fn udev_device_get_sysattr_value(
++    fn rustd_device_get_sysattr_value(
+         device: *mut libc::c_void,
+         key: *const libc::c_char,
+     ) -> *const libc::c_char;
+@@ -32,7 +32,7 @@ pub const FUZZ_AXES: [AbsoluteAxisCode; 4] = [
+ ];
+ 
+ pub struct DeviceHandle {
+-    udev: *mut libc::c_void,
++    ctx: *mut libc::c_void,
+     device: *mut libc::c_void,
+ }
+ 
+@@ -40,26 +40,26 @@ impl DeviceHandle {
+     pub fn from_syspath(path: &Path) -> Option<Self> {
+         let path = CString::new(path.as_os_str().as_encoded_bytes()).ok()?;
+         unsafe {
+-            let udev = udev_new();
+-            if udev.is_null() {
++            let ctx = rustd_device_ctx_new();
++            if ctx.is_null() {
+                 return None;
+             }
+-            let device = udev_device_new_from_syspath(udev, path.as_ptr());
++            let device = rustd_device_new_from_syspath(ctx, path.as_ptr());
+             if device.is_null() {
+-                udev_unref(udev);
++                rustd_device_ctx_unref(ctx);
+                 return None;
+             }
+-            Some(Self { udev, device })
++            Some(Self { ctx, device })
+         }
+     }
+ 
+     pub fn devnode(&self) -> Option<String> {
+-        unsafe { string_from_ptr(udev_device_get_devnode(self.device)) }
++        unsafe { string_from_ptr(rustd_device_get_devnode(self.device)) }
+     }
+ 
+     pub fn property(&self, key: &str) -> Option<String> {
+         let key = CString::new(key).ok()?;
+-        unsafe { string_from_ptr(udev_device_get_property_value(self.device, key.as_ptr())) }
++        unsafe { string_from_ptr(rustd_device_get_property_value(self.device, key.as_ptr())) }
+     }
+ 
+     pub fn first_parent_value(&self, key: &str) -> Option<(String, Option<String>)> {
+@@ -69,13 +69,13 @@ impl DeviceHandle {
+             let mut device = self.device;
+             while !device.is_null() {
+                 if let Some(value) =
+-                    string_from_ptr(udev_device_get_sysattr_value(device, key.as_ptr()))
++                    string_from_ptr(rustd_device_get_sysattr_value(device, key.as_ptr()))
+                 {
+                     let product =
+-                        string_from_ptr(udev_device_get_property_value(device, product.as_ptr()));
++                        string_from_ptr(rustd_device_get_property_value(device, product.as_ptr()));
+                     return Some((value, product));
+                 }
+-                device = udev_device_get_parent(device);
++                device = rustd_device_get_parent(device);
+             }
+         }
+         None
+@@ -85,8 +85,8 @@ impl DeviceHandle {
+ impl Drop for DeviceHandle {
+     fn drop(&mut self) {
+         unsafe {
+-            udev_device_unref(self.device);
+-            udev_unref(self.udev);
++            rustd_device_unref(self.device);
++            rustd_device_ctx_unref(self.ctx);
+         }
+     }
+ }

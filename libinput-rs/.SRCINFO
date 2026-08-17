@@ -1,7 +1,7 @@
 pkgbase = libinput-rs
 	pkgdesc = 100% drop-in Rust replacement for the libinput 1.31.3 C ABI and tools
 	pkgver = 0.3.11
-	pkgrel = 4
+	pkgrel = 5
 	url = https://github.com/SisyphusAeolides/libinput-rs
 	arch = x86_64
 	license = MIT
@@ -12,9 +12,10 @@ pkgbase = libinput-rs
 	makedepends = curl
 	makedepends = patch
 	makedepends = ninja
+	makedepends = rustd-devel
 	depends = glibc
 	depends = gcc-libs
-	depends = systemd-libs
+	depends = rustd-libs
 	depends = libevdev
 	depends = mtdev
 	depends = python-libevdev
@@ -27,7 +28,9 @@ pkgbase = libinput-rs
 	replaces = libinput-rs-git
 	source = git+https://github.com/SisyphusAeolides/libinput-rs.git#commit=3cb534b00629fbc846cfcd13bd642653a0ceb6a0
 	source = https://gitlab.freedesktop.org/libinput/libinput/-/archive/26191d396d74d505541d6311f0b4ae68d791b890/libinput-26191d396d74d505541d6311f0b4ae68d791b890.tar.gz
+	source = retarget-rustd-device.patch
 	sha256sums = SKIP
 	sha256sums = d5d8c8464f9cb24b0897c03edfe7d7c9e75ff5a91fe9b5b48791781aa9642858
+	sha256sums = 6eefddcc103684bb6011c8162fba9de2692e56f6aa865e343130d1c12b868ec7
 
 pkgname = libinput-rs

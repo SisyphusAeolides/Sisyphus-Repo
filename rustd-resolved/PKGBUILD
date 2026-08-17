@@ -1,19 +1,49 @@
 # Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
 pkgname=rustd-resolved
 pkgver=0.2.3
-pkgrel=1
+pkgrel=4
 # Exact signed SHA promoted for exclusive CachyOS replacement.
 _commit=f2f6cc1a81b6adc9f5320be4cab5de9eb24b6f72
-pkgdesc="RustD DNS resolver (exclusive host ownership)"
+_rustd_nss_name=rustd_dns
+pkgdesc="RustD native DNS resolver"
 arch=('x86_64')
 url="https://github.com/SisyphusAeolides/rustd-resolved"
 license=('LGPL-2.1-or-later')
 depends=('glibc' 'gcc-libs' 'openssl' 'liburing' 'rustd')
 makedepends=('cargo' 'git' 'gcc-fortran' 'liburing')
-conflicts=('rustd-resolved-git')
+conflicts=('rustd-resolved-git' 'systemd-resolved')
+replaces=('systemd-resolved')
+provides=('dns-resolver')
 install=rustd-resolved.install
 source=("git+${url}.git#commit=${_commit}")
 sha256sums=('SKIP')
+
+prepare() {
+  cd "$pkgname"
+
+  # Normalize pinned upstream trees onto the native NSS ABI used by the
+  # working source (`libnss_rustd_dns.so.2` / hosts: rustd_dns).
+  if grep -Fq 'libnss_resolve.so.2' nss/Makefile; then
+    sed -i "s/libnss_resolve/libnss_${_rustd_nss_name}/g" Makefile nss/Makefile
+    sed -i "s/_nss_resolve_/_nss_${_rustd_nss_name}_/g" nss/*.c nss/*.sym
+    sed -i "s/files myhostname resolve /files myhostname ${_rustd_nss_name} /g" Makefile
+  elif grep -Fq 'libnss_rustd_resolve.so.2' nss/Makefile; then
+    sed -i "s/libnss_rustd_resolve/libnss_${_rustd_nss_name}/g" Makefile nss/Makefile
+    sed -i "s/_nss_rustd_resolve_/_nss_${_rustd_nss_name}_/g" nss/*.c nss/*.sym
+    sed -i "s/files myhostname rustd_resolve /files myhostname ${_rustd_nss_name} /g" Makefile
+  fi
+  sed -i -E \
+    -e "s/(^|[[:space:]])resolve([[:space:]]|$)/\\1${_rustd_nss_name}\\2/g" \
+    -e "s/(^|[[:space:]])rustd_resolve([[:space:]]|$)/\\1${_rustd_nss_name}\\2/g" \
+    packaging/nsswitch.conf.fragment
+
+  grep -Fq "libnss_${_rustd_nss_name}.so.2" nss/Makefile
+  grep -Rqs --include='*.sym' "_nss_${_rustd_nss_name}_" nss
+  ! grep -Fq 'libnss_resolve.so.2' nss/Makefile
+  ! grep -Fq 'libnss_rustd_resolve.so.2' nss/Makefile
+  ! grep -Eq '(^|[[:space:]])resolve([[:space:]]|$)' packaging/nsswitch.conf.fragment
+  ! grep -Eq '(^|[[:space:]])rustd_resolve([[:space:]]|$)' packaging/nsswitch.conf.fragment
+}
 
 build() {
   cd "$pkgname"
@@ -31,6 +61,16 @@ check() {
 package() {
   cd "$pkgname"
   make DESTDIR="$pkgdir" PREFIX=/usr install
+
+  [[ -f "$pkgdir/usr/lib/libnss_${_rustd_nss_name}.so.2" ]] || {
+    error "RustD-native NSS module was not installed"
+    return 1
+  }
+  [[ ! -e "$pkgdir/usr/lib/libnss_resolve.so.2" ]] || {
+    error "compatibility NSS module escaped native-only packaging"
+    return 1
+  }
+  ln -sf ../lib/rustd/rustd-resolved "$pkgdir/usr/bin/rustd-resolved"
   install -d "$pkgdir/usr/lib/rustd/resolved"
   printf '%s\n' "$_commit" >"$pkgdir/usr/lib/rustd/resolved/CERTIFIED_COMMIT"
   install -Dm644 /dev/null "$pkgdir/usr/lib/rustd/resolved/.exclusive-replacement"

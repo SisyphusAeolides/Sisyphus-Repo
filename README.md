@@ -48,8 +48,22 @@ replace an existing snapshot.
 
 The packages replace their corresponding `-git` names. `ccze-rs` replaces
 `ccze`, `libinput-rs` replaces `libinput`, and `tuned-rs` replaces `tuned` and
-`power-profiles-daemon` when those packages are installed. `rustd` replaces
-`systemd` and `rustd-resolved` replaces `systemd-resolved` when those packages
-are installed. `rustd` and `rustd-resolved` are published only from exact source
-commits carrying passing replacement-readiness certificates for the pinned systemd
-v261 baseline.
+`power-profiles-daemon` when those packages are installed.
+
+RustD's native-only cutover is a coordinated repository transition, not a
+drop-in package alias. The final repository will not provide systemd package
+names, shared-library SONAMEs, commands, or protocols. Every package listed in
+[`native-cutover-packages.txt`](native-cutover-packages.txt) must first be
+rebuilt against RustD-native APIs or removed from the certified profile.
+`scripts/audit-systemd-closure.py` compares that manifest with an installed
+CachyOS system and inventories remaining ELF links:
+
+```sh
+python3 scripts/audit-systemd-closure.py \
+  --manifest native-cutover-packages.txt \
+  --output rustd-systemd-closure.json
+```
+
+RustD packages may be promoted only from exact source commits carrying passing
+native-purity, installed-system, rollback, security, and performance
+certificates against the frozen systemd v261 comparison image.
