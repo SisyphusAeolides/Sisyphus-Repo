@@ -1,0 +1,21 @@
+source_commit=db1bfef4500d5584d049822649c938e5cbd2078d
+workflow_run=32164536206
+workflow_attempt=1
+f4238cc68d230a5d3ed10864d0636bea89a6e22790c4c09723a08c7704599de5  ./ccze-rs-0.5.4-4-x86_64.pkg.tar.zst
+81405d937f300450fe875a25613cf37989d6557d465358a4453e4e7214b06ac1  ./ccze-rs-debug-0.5.4-4-x86_64.pkg.tar.zst
+c95d09317f4fa06109aceb39b6cc96c337c190ee0eae9c211d3561e03ac174f3  ./elan-guardian-0.2.15-6-x86_64.pkg.tar.zst
+2fdcfc4f137991726886fd7b1198ca01945c2a953c5f9147f37c34b58a227ae4  ./elan-guardian-debug-0.2.15-6-x86_64.pkg.tar.zst
+18e8ddbf1291f51f1d2bb4f832be4329bf08e8d3be3f6391529a7e9f721752a7  ./libinput-rs-0.3.11-6-x86_64.pkg.tar.zst
+8348269aa1ce699583f2e4e448ec4bf4d7ec51b160dd50257be68f7315fde99e  ./libinput-rs-debug-0.3.11-6-x86_64.pkg.tar.zst
+39170e84b0f36b5d23367f07780decac2de198e1364929a766620f9ee30086a1  ./tuned-rs-0.2.10-6-x86_64.pkg.tar.zst
+89ab3046c207fb295331453cee71855530e60c55abd7cae2e89ba5313a500c01  ./tuned-rs-debug-0.2.10-6-x86_64.pkg.tar.zst
+10fa4ac64051e1977db28bc9fd9f7d11e92f7a718fd951adce1c4eee309a04dd  ./ccze-rs-0.5.4-4-x86_64.pkg.tar.zst.sig
+c41d6173110db98c03d3059b2847fa73e96572f9d8052a5d5a2b06e8d8688dad  ./ccze-rs-debug-0.5.4-4-x86_64.pkg.tar.zst.sig
+a6c4ee64ee58a21e782bfb0e9eb02b7347c9d38f4d8636925d3e27c9892b22db  ./elan-guardian-0.2.15-6-x86_64.pkg.tar.zst.sig
+dd737e73fdbc10b3726e972e332c00cd2027533610e543cb765a49542eea68ea  ./elan-guardian-debug-0.2.15-6-x86_64.pkg.tar.zst.sig
+278a43deec7908ded35013a0d0e93c14572a9d7e8f10ea36be934613b4509fca  ./libinput-rs-0.3.11-6-x86_64.pkg.tar.zst.sig
+cef329401faf9d6e759524a304686506b8f9762defbbab714bc1ef9a5a37c850  ./libinput-rs-debug-0.3.11-6-x86_64.pkg.tar.zst.sig
+cd8a90279a883ac105a8e49fa5df0cb987069fe7ca0dc798978c7070777ac579  ./tuned-rs-0.2.10-6-x86_64.pkg.tar.zst.sig
+f04ea40d3c8bb411bf22e15719f84a51182c4b65619690aebae25a2332dcf358  ./tuned-rs-debug-0.2.10-6-x86_64.pkg.tar.zst.sig
+7e348be95e38020a65e9024ad5b833f0ca52055e02b5a37289f50e8ef3c3225b  sisyphus.db.tar.gz
+edde479dde678c3bb8be507da58cfe1e8eecef87d8ff44f84c1dfdca00485eda  sisyphus.db.tar.gz.sig
