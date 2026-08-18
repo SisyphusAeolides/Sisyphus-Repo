@@ -1,25 +1,18 @@
 # Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
 pkgname=elan-guardian
 pkgver=0.2.15
-pkgrel=5
+pkgrel=6
 _commit=286830c99ec7700762133b1cfa5f60b30416d1d3
 pkgdesc="Evidence-driven diagnostics and recovery for Elantech I2C input controllers"
 arch=('x86_64')
 url="https://github.com/SisyphusAeolides/elan-guardian"
 license=('GPL2')
-depends=('binutils' 'dkms' 'gcc-libs' 'glibc' 'kmod' 'rust')
+depends=('binutils' 'dkms' 'gcc-libs' 'glibc' 'kmod' 'rust' 'systemd-libs')
 makedepends=('cargo' 'git' 'gcc-fortran')
 conflicts=('elan-guardian-git')
 replaces=('elan-guardian-git')
-source=("git+${url}.git#commit=${_commit}"
-        "retarget-rustd-units.patch")
-sha256sums=('SKIP'
-            'fccc6bb25df87f495ea76a7f1d3938e0b81c8f8d4b14cacb359080115ba29c58')
-
-prepare() {
-  cd "$pkgname"
-  patch -p1 <"$srcdir/retarget-rustd-units.patch"
-}
+source=("git+${url}.git#commit=${_commit}")
+sha256sums=('SKIP')
 
 build() {
   cd "$pkgname"
@@ -30,13 +23,13 @@ package() {
   cd "$pkgname"
   install -Dm0755 target/release/elan-guardian "$pkgdir/usr/bin/elan-guardian"
   install -Dm0755 target/release/elan-trace-score "$pkgdir/usr/bin/elan-trace-score"
-  install -Dm0644 systemd/elan-guardian-resume.service "$pkgdir/usr/lib/rustd/system/elan-guardian-resume.service"
-  install -Dm0644 systemd/elan-guardian-module.service "$pkgdir/usr/lib/rustd/system/elan-guardian-module.service"
-  install -Dm0644 systemd/elan-guardian-watch.service "$pkgdir/usr/lib/rustd/system/elan-guardian-watch.service"
-  install -Dm0644 systemd/elan-guardian-watch.service.d/50-interval.conf "$pkgdir/usr/lib/rustd/system/elan-guardian-watch.service.d/50-interval.conf"
-  install -Dm0644 systemd/elan-i2c-recover.service "$pkgdir/usr/lib/rustd/system/elan-i2c-recover.service"
+  install -Dm0644 systemd/elan-guardian-resume.service "$pkgdir/usr/lib/systemd/system/elan-guardian-resume.service"
+  install -Dm0644 systemd/elan-guardian-module.service "$pkgdir/usr/lib/systemd/system/elan-guardian-module.service"
+  install -Dm0644 systemd/elan-guardian-watch.service "$pkgdir/usr/lib/systemd/system/elan-guardian-watch.service"
+  install -Dm0644 systemd/elan-guardian-watch.service.d/50-interval.conf "$pkgdir/usr/lib/systemd/system/elan-guardian-watch.service.d/50-interval.conf"
+  install -Dm0644 systemd/elan-i2c-recover.service "$pkgdir/usr/lib/systemd/system/elan-i2c-recover.service"
   install -Dm0644 systemd/99-elan-i2c-recover.rules "$pkgdir/usr/lib/udev/rules.d/99-elan-i2c-recover.rules"
-  install -Dm0644 systemd/91-elan-guardian.preset "$pkgdir/usr/lib/rustd/system-preset/91-elan-guardian.preset"
+  install -Dm0644 systemd/91-elan-guardian.preset "$pkgdir/usr/lib/systemd/system-preset/91-elan-guardian.preset"
   install -Dm0644 packaging/elan-guardian.8 "$pkgdir/usr/share/man/man8/elan-guardian.8"
   install -Dm0644 formal/agda/ElanGuardian.agda "$pkgdir/usr/share/doc/$pkgname/formal/agda/ElanGuardian.agda"
   install -Dm0644 formal/idris/ElanPolicy.idr "$pkgdir/usr/share/doc/$pkgname/formal/idris/ElanPolicy.idr"
