@@ -10,8 +10,6 @@ This repository publishes x86_64 packages for:
 - `elan-guardian`
 - `libinput-rs`
 - `tuned-rs`
-- `rustd`
-- `rustd-resolved`
 
 
 Add the repository to `/etc/pacman.conf`:
@@ -33,7 +31,7 @@ gpg --show-keys --with-fingerprint --keyid-format long sisyphus-repo.asc
 sudo pacman-key --add sisyphus-repo.asc
 sudo pacman-key --lsign-key 2A02745D8C2C03AE7F95BCEA8136EB9238213447
 sudo pacman -Syy
-sudo pacman -S ccze-rs elan-guardian libinput-rs tuned-rs rustd rustd-resolved
+sudo pacman -S ccze-rs elan-guardian libinput-rs tuned-rs
 ```
 
 `SigLevel = Required DatabaseRequired` rejects unsigned packages and unsigned
@@ -50,20 +48,3 @@ The packages replace their corresponding `-git` names. `ccze-rs` replaces
 `ccze`, `libinput-rs` replaces `libinput`, and `tuned-rs` replaces `tuned` and
 `power-profiles-daemon` when those packages are installed.
 
-RustD's native-only cutover is a coordinated repository transition, not a
-drop-in package alias. The final repository will not provide systemd package
-names, shared-library SONAMEs, commands, or protocols. Every package listed in
-[`native-cutover-packages.txt`](native-cutover-packages.txt) must first be
-rebuilt against RustD-native APIs or removed from the certified profile.
-`scripts/audit-systemd-closure.py` compares that manifest with an installed
-CachyOS system and inventories remaining ELF links:
-
-```sh
-python3 scripts/audit-systemd-closure.py \
-  --manifest native-cutover-packages.txt \
-  --output rustd-systemd-closure.json
-```
-
-RustD packages may be promoted only from exact source commits carrying passing
-native-purity, installed-system, rollback, security, and performance
-certificates against the frozen systemd v261 comparison image.
