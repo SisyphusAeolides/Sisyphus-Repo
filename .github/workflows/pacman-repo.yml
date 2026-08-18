@@ -46,7 +46,7 @@ jobs:
           set -euo pipefail
           runuser -u builduser -- bash -c '
             set -euo pipefail
-            for pkg in ccze-rs elan-guardian libinput-rs tuned-rs rustd rustd-resolved; do
+            for pkg in ccze-rs elan-guardian libinput-rs tuned-rs; do
               (
                 cd "$pkg"
                 diff -u .SRCINFO <(makepkg --printsrcinfo)
@@ -72,7 +72,7 @@ jobs:
             set -euo pipefail
             git config --global --add safe.directory "*"
             mkdir -p x86_64
-            for pkg in ccze-rs elan-guardian libinput-rs tuned-rs rustd rustd-resolved; do
+            for pkg in ccze-rs elan-guardian libinput-rs tuned-rs; do
               cd "$pkg"
               mapfile -t artifacts < <(makepkg --packagelist)
               makepkg -s --noconfirm --cleanbuild --clean
