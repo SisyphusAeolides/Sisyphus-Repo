@@ -1,14 +1,14 @@
 # Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
 pkgname=libinput-rs
 pkgver=0.3.11
-pkgrel=5
+pkgrel=6
 _commit=3cb534b00629fbc846cfcd13bd642653a0ceb6a0
 pkgdesc="100% drop-in Rust replacement for the libinput 1.31.3 C ABI and tools"
 arch=('x86_64')
 url="https://github.com/SisyphusAeolides/libinput-rs"
 license=('MIT')
-depends=('glibc' 'gcc-libs' 'rustd-libs' 'libevdev' 'mtdev' 'python-libevdev' 'python-pyudev' 'python-yaml')
-makedepends=('cargo' 'git' 'gcc-fortran' 'meson' 'curl' 'patch' 'ninja' 'rustd-devel')
+depends=('glibc' 'gcc-libs' 'systemd-libs' 'libevdev' 'mtdev' 'python-libevdev' 'python-pyudev' 'python-yaml')
+makedepends=('cargo' 'git' 'gcc-fortran' 'meson' 'curl' 'patch' 'ninja')
 provides=('libinput')
 conflicts=('libinput' 'libinput-rs-git')
 replaces=('libinput' 'libinput-rs-git')
@@ -17,18 +17,11 @@ _tools_commit=26191d396d74d505541d6311f0b4ae68d791b890
 source=(
   "git+${url}.git#commit=${_commit}"
   "https://gitlab.freedesktop.org/libinput/libinput/-/archive/${_tools_commit}/libinput-${_tools_commit}.tar.gz"
-  "retarget-rustd-device.patch"
 )
 sha256sums=(
   'SKIP'
   'd5d8c8464f9cb24b0897c03edfe7d7c9e75ff5a91fe9b5b48791781aa9642858'
-  '6eefddcc103684bb6011c8162fba9de2692e56f6aa865e343130d1c12b868ec7'
 )
-
-prepare() {
-  cd "$pkgname"
-  patch -p1 <"$srcdir/retarget-rustd-device.patch"
-}
 
 build() {
   cd "$pkgname"
@@ -48,17 +41,5 @@ package() {
     RPM_TOPDIR="$srcdir" \
     UPSTREAM_TOOLS_ARCHIVE="$srcdir/libinput-${_tools_commit}.tar.gz" \
     install
-  # Native unit path: never install under /usr/lib/systemd.
-  if [[ -f "$pkgdir/usr/lib/systemd/system/libinput-rs-elan-resume.service" ]]; then
-    install -Dm0644 "$pkgdir/usr/lib/systemd/system/libinput-rs-elan-resume.service" \
-      "$pkgdir/usr/lib/rustd/system/libinput-rs-elan-resume.service"
-    rm -f "$pkgdir/usr/lib/systemd/system/libinput-rs-elan-resume.service"
-  fi
-  if [[ -f "$pkgdir/usr/lib/systemd/system-preset/91-libinput-rs-elan.preset" ]]; then
-    install -Dm0644 "$pkgdir/usr/lib/systemd/system-preset/91-libinput-rs-elan.preset" \
-      "$pkgdir/usr/lib/rustd/system-preset/91-libinput-rs-elan.preset"
-    rm -f "$pkgdir/usr/lib/systemd/system-preset/91-libinput-rs-elan.preset"
-  fi
-  rm -rf "$pkgdir/usr/lib/systemd"
   install -Dm0644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
 }
