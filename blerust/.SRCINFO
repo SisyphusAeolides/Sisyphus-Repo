@@ -1,6 +1,6 @@
 pkgbase = blerust
 	pkgdesc = Blazing fast and robust line editor in Rust (replacement for blesh)
-	pkgver = 0.1.0
+	pkgver = 0.1.1
 	pkgrel = 1
 	url = https://github.com/SisyphusAeolides/blerust
 	arch = x86_64
@@ -14,7 +14,7 @@ pkgbase = blerust
 	conflicts = blesh
 	conflicts = blesh-git
 	options = !lto
-	source = git+https://github.com/SisyphusAeolides/blerust.git#commit=7a015b3732383041fe483b90aed95a7c2ff79d1b
+	source = git+https://github.com/SisyphusAeolides/blerust.git#commit=f624c77ec4cd90a75148f7583ef7c9b29ae7fbd0
 	sha256sums = SKIP
 
 pkgname = blerust
