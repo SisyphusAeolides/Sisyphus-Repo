@@ -1,0 +1,26 @@
+# Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
+pkgname=blerust
+pkgver=0.1.0
+pkgrel=1
+_commit=7a015b3732383041fe483b90aed95a7c2ff79d1b
+pkgdesc="Blazing fast and robust line editor in Rust (replacement for blesh)"
+arch=('x86_64')
+url="https://github.com/SisyphusAeolides/blerust"
+license=('MIT')
+depends=('gcc-libs' 'glibc')
+makedepends=('cargo' 'git')
+provides=('blerust' 'blesh')
+conflicts=('blesh' 'blesh-git')
+options=(!lto)
+source=("git+${url}.git#commit=${_commit}")
+sha256sums=('SKIP')
+
+build() {
+  cd "$pkgname"
+  cargo build --release --locked
+}
+
+package() {
+  cd "$pkgname"
+  install -Dm755 "target/release/$pkgname" "$pkgdir/usr/bin/$pkgname"
+}
