@@ -1,8 +1,8 @@
 # Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
 pkgname=blerust
-pkgver=0.1.7
+pkgver=0.1.9
 pkgrel=1
-_commit=6b124339fe14763f3227efb87e5ebda01ddb5d4b
+_commit=f5168baa7a1fb732282f8f15ca1f47d708f77d83
 pkgdesc="Blazing fast and robust line editor in Rust (replacement for blesh)"
 arch=('x86_64')
 url="https://github.com/SisyphusAeolides/blerust"
