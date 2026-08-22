@@ -2,7 +2,7 @@
 pkgname=blerust
 pkgver=0.1.9
 pkgrel=1
-_commit=f5168baa7a1fb732282f8f15ca1f47d708f77d83
+_commit=f5168baaf4befa7198621bdc310b561107a2bd0c
 pkgdesc="Blazing fast and robust line editor in Rust (replacement for blesh)"
 arch=('x86_64')
 url="https://github.com/SisyphusAeolides/blerust"

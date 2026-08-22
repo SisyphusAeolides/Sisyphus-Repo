@@ -14,7 +14,7 @@ pkgbase = blerust
 	conflicts = blesh
 	conflicts = blesh-git
 	options = !lto
-	source = git+https://github.com/SisyphusAeolides/blerust.git#commit=f5168baa7a1fb732282f8f15ca1f47d708f77d83
+	source = git+https://github.com/SisyphusAeolides/blerust.git#commit=f5168baaf4befa7198621bdc310b561107a2bd0c
 	sha256sums = SKIP
 
 pkgname = blerust
