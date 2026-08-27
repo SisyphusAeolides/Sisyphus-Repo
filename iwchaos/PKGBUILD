@@ -1,8 +1,8 @@
 # Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
 pkgname=iwchaos
 pkgver=0.1.0
-pkgrel=8
-_commit=fc1b833
+pkgrel=9
+_commit=34d5876
 pkgdesc="Complete iwlwifi replacement with chaos-enhanced Intel Wi-Fi driver (AX200/AX201)"
 arch=('x86_64')
 url="https://github.com/SisyphusAeolides/iwchaos"
@@ -49,6 +49,7 @@ package() {
     --exclude='.git' \
     --exclude='.github' \
     --exclude='rust/target' \
+    --exclude='chaos-math/target' \
     --exclude='rust/.ar-extract' \
     --exclude='*.o' \
     --exclude='*.ko' \
