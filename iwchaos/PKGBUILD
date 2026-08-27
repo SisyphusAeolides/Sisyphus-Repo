@@ -1,7 +1,7 @@
 # Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
 pkgname=iwchaos
 pkgver=0.1.0
-pkgrel=1
+pkgrel=2
 _commit=815596e5e93506c0232d7117684a43cbffcec93f
 pkgdesc="Complete iwlwifi replacement with chaos-enhanced Intel Wi-Fi driver (AX200/AX201)"
 arch=('x86_64')
@@ -21,7 +21,7 @@ package() {
 
   install -dm755 "$_dest"
   rsync -a --exclude='.git' --exclude='vendor' --exclude='*.o' --exclude='*.ko' \
-    --exclude='.github' --exclude='pkg' --exclude='src' \
+    --exclude='.github' --exclude='/pkg' --exclude='/src' \
     ./ "$_dest/"
 
   install -Dm644 dkms.conf "$_dest/dkms.conf"
