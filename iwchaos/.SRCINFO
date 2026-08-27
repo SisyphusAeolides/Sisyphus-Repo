@@ -25,7 +25,7 @@ pkgbase = iwchaos
 	conflicts = iwlmvm
 	options = !lto
 	options = !debug
-	source = git+https://github.com/SisyphusAeolides/iwchaos.git#commit=34d5876
+	source = git+https://github.com/SisyphusAeolides/iwchaos.git#commit=bb2ff2a60a31bc9585eecdee841c382699dad3c8
 	sha256sums = SKIP
 
 pkgname = iwchaos
