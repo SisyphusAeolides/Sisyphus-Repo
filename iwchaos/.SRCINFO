@@ -1,19 +1,21 @@
 pkgbase = iwchaos
 	pkgdesc = Complete iwlwifi replacement with chaos-enhanced Intel Wi-Fi driver (AX200/AX201)
 	pkgver = 0.1.0
-	pkgrel = 4
+	pkgrel = 5
 	url = https://github.com/SisyphusAeolides/iwchaos
 	arch = x86_64
 	license = GPL-2.0-only
 	makedepends = git
 	makedepends = rsync
-	makedepends = curl
 	makedepends = tar
+	depends = binutils
+	depends = clang
+	depends = curl
 	depends = dkms
 	depends = gcc
 	depends = gcc-fortran
 	depends = kmod
-	depends = linux
+	depends = llvm
 	depends = patch
 	depends = python3
 	depends = rust
@@ -23,7 +25,7 @@ pkgbase = iwchaos
 	conflicts = iwlmvm
 	options = !lto
 	options = !debug
-	source = git+https://github.com/SisyphusAeolides/iwchaos.git#commit=815596e5e93506c0232d7117684a43cbffcec93f
+	source = git+https://github.com/SisyphusAeolides/iwchaos.git#commit=58d7dd024e0048bc83783c34e80c83d86e1bc703
 	sha256sums = SKIP
 
 pkgname = iwchaos

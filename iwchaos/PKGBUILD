@@ -1,14 +1,26 @@
 # Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
 pkgname=iwchaos
 pkgver=0.1.0
-pkgrel=4
-_commit=815596e5e93506c0232d7117684a43cbffcec93f
+pkgrel=5
+_commit=58d7dd024e0048bc83783c34e80c83d86e1bc703
 pkgdesc="Complete iwlwifi replacement with chaos-enhanced Intel Wi-Fi driver (AX200/AX201)"
 arch=('x86_64')
 url="https://github.com/SisyphusAeolides/iwchaos"
 license=('GPL-2.0-only')
-depends=('dkms' 'gcc' 'gcc-fortran' 'kmod' 'linux' 'patch' 'python3' 'rust')
-makedepends=('git' 'rsync' 'curl' 'tar')
+depends=(
+  'binutils'
+  'clang'
+  'curl'
+  'dkms'
+  'gcc'
+  'gcc-fortran'
+  'kmod'
+  'llvm'
+  'patch'
+  'python3'
+  'rust'
+)
+makedepends=('git' 'rsync' 'tar')
 provides=('iwlwifi' 'iwlmvm')
 conflicts=('iwlwifi' 'iwlmvm')
 options=(!lto !debug)
@@ -19,7 +31,12 @@ build() {
   cd "$pkgname"
   if [ ! -f vendor/iwlwifi/iwl-drv.c ]; then
     mkdir -p vendor/iwlwifi
-    curl -sL "https://github.com/torvalds/linux/archive/refs/tags/v7.2.tar.gz" | tar -xz --strip-components=6 -C vendor/iwlwifi "linux-7.2/drivers/net/wireless/intel/iwlwifi/"
+    curl -sL "https://github.com/torvalds/linux/archive/refs/tags/v7.2.tar.gz" \
+      | tar -xz --strip-components=6 -C vendor/iwlwifi \
+        "linux-7.2/drivers/net/wireless/intel/iwlwifi/"
+  fi
+  if ! grep -q iwchaos_iwlwifi_init vendor/iwlwifi/iwl-drv.c 2>/dev/null; then
+    ./scripts/apply-vendor-patches.sh
   fi
 }
 
@@ -28,8 +45,16 @@ package() {
   local _dest="$pkgdir/usr/src/${pkgname}-${pkgver}"
 
   install -dm755 "$_dest"
-  rsync -a --exclude='.git' --exclude='*.o' --exclude='*.ko' \
-    --exclude='.github' --exclude='/pkg' --exclude='/src' \
+  rsync -a \
+    --exclude='.git' \
+    --exclude='.github' \
+    --exclude='rust/target' \
+    --exclude='rust/.ar-extract' \
+    --exclude='*.o' \
+    --exclude='*.ko' \
+    --exclude='*.BTF.*' \
+    --exclude='pkg' \
+    --exclude='src' \
     ./ "$_dest/"
 
   install -Dm644 dkms.conf "$_dest/dkms.conf"
