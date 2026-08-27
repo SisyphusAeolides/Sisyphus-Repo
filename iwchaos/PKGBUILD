@@ -1,0 +1,33 @@
+# Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
+pkgname=iwchaos
+pkgver=0.1.0
+pkgrel=1
+_commit=815596e5e93506c0232d7117684a43cbffcec93f
+pkgdesc="Complete iwlwifi replacement with chaos-enhanced Intel Wi-Fi driver (AX200/AX201)"
+arch=('x86_64')
+url="https://github.com/SisyphusAeolides/iwchaos"
+license=('GPL-2.0-only')
+depends=('curl' 'dkms' 'gcc' 'gcc-fortran' 'kmod' 'linux' 'patch' 'python3' 'rust')
+makedepends=('git' 'rsync')
+provides=('iwlwifi' 'iwlmvm')
+conflicts=('iwlwifi' 'iwlmvm')
+options=(!lto !debug)
+source=("git+${url}.git#commit=${_commit}")
+sha256sums=('SKIP')
+
+package() {
+  cd "$pkgname"
+  local _dest="$pkgdir/usr/src/${pkgname}-${pkgver}"
+
+  install -dm755 "$_dest"
+  rsync -a --exclude='.git' --exclude='vendor' --exclude='*.o' --exclude='*.ko' \
+    --exclude='.github' --exclude='pkg' --exclude='src' \
+    ./ "$_dest/"
+
+  install -Dm644 dkms.conf "$_dest/dkms.conf"
+  install -Dm644 modprobe.d/iwchaos.conf \
+    "$pkgdir/usr/lib/modprobe.d/iwchaos.conf"
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+  install -Dm755 scripts/swap-iwchaos.sh "$pkgdir/usr/bin/iwchaos-swap"
+  install -Dm755 scripts/restore-iwlwifi.sh "$pkgdir/usr/bin/iwchaos-restore"
+}

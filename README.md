@@ -6,6 +6,7 @@ outside this repository's maintenance scope.
 
 This repository publishes x86_64 packages for:
 
+- `iwchaos`
 - `blerust`
 - `ccze-rs`
 - `elan-guardian`
@@ -32,7 +33,7 @@ gpg --show-keys --with-fingerprint --keyid-format long sisyphus-repo.asc
 sudo pacman-key --add sisyphus-repo.asc
 sudo pacman-key --lsign-key 2A02745D8C2C03AE7F95BCEA8136EB9238213447
 sudo pacman -Syy
-sudo pacman -S blerust ccze-rs elan-guardian libinput-rs tuned-rs
+sudo pacman -S blerust ccze-rs elan-guardian iwchaos libinput-rs tuned-rs
 ```
 
 `SigLevel = Required DatabaseRequired` rejects unsigned packages and unsigned
@@ -46,7 +47,7 @@ run, timestamp, and SHA-256 checksums. The publishing workflow refuses to
 replace an existing snapshot.
 
 The packages replace their corresponding `-git` names. `blerust` replaces
-`blesh`, `ccze-rs` replaces `ccze`, `libinput-rs` replaces `libinput`, and
-`tuned-rs` replaces `tuned` and `power-profiles-daemon` when those packages
-are installed.
+`blesh`, `ccze-rs` replaces `ccze`, `iwchaos` replaces in-tree `iwlwifi` and
+`iwlmvm`, `libinput-rs` replaces `libinput`, and `tuned-rs` replaces `tuned`
+and `power-profiles-daemon` when those packages are installed.
 
