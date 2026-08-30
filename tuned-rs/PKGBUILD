@@ -2,7 +2,7 @@
 pkgname=tuned-rs
 pkgver=0.3.0
 pkgrel=1
-_commit=ea8d225c97762c5fb6332df8806219c06e25449c
+_commit=b78181c2a08439ad25787a0114717dd0d1bb9931
 pkgdesc="High-performance Rust implementation of the TuneD system tuning daemon"
 arch=('x86_64')
 url="https://github.com/SisyphusAeolides/tuned-rs"
