@@ -18,7 +18,7 @@ pkgbase = tuned-rs
 	replaces = power-profiles-daemon
 	replaces = tuned
 	replaces = tuned-rs-git
-	source = git+https://github.com/SisyphusAeolides/tuned-rs.git#commit=ea8d225c97762c5fb6332df8806219c06e25449c
+	source = git+https://github.com/SisyphusAeolides/tuned-rs.git#commit=b78181c2a08439ad25787a0114717dd0d1bb9931
 	sha256sums = SKIP
 
 pkgname = tuned-rs
