@@ -17,7 +17,7 @@ pkgbase = iwchaos
 	depends = rust
 	options = !lto
 	options = !debug
-	source = git+https://github.com/SisyphusAeolides/iwchaos.git#commit=e9a65b5a37f508360a4f65af255fc0aff521c23f
+	source = git+https://github.com/SisyphusAeolides/iwchaos.git#commit=2361327855ac6e0288ef3a78de5a420a2a9b8739
 	sha256sums = SKIP
 
 pkgname = iwchaos
