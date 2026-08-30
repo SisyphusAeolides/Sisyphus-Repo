@@ -1,8 +1,8 @@
 # Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
 pkgname=iwchaos
-pkgver=0.2.1
+pkgver=0.2.2
 pkgrel=1
-_commit=2361327855ac6e0288ef3a78de5a420a2a9b8739
+_commit=7fa4bced3068a0a0b538626185f977db5ffb1ff7
 pkgdesc="Target-kernel Intel Wi-Fi modules with a bounded rate policy"
 arch=('x86_64')
 url="https://github.com/SisyphusAeolides/iwchaos"

@@ -1,6 +1,6 @@
 pkgbase = iwchaos
 	pkgdesc = Target-kernel Intel Wi-Fi modules with a bounded rate policy
-	pkgver = 0.2.1
+	pkgver = 0.2.2
 	pkgrel = 1
 	url = https://github.com/SisyphusAeolides/iwchaos
 	arch = x86_64
@@ -17,7 +17,7 @@ pkgbase = iwchaos
 	depends = rust
 	options = !lto
 	options = !debug
-	source = git+https://github.com/SisyphusAeolides/iwchaos.git#commit=2361327855ac6e0288ef3a78de5a420a2a9b8739
+	source = git+https://github.com/SisyphusAeolides/iwchaos.git#commit=7fa4bced3068a0a0b538626185f977db5ffb1ff7
 	sha256sums = SKIP
 
 pkgname = iwchaos
