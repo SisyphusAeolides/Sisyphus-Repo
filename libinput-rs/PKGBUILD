@@ -1,4 +1,4 @@
-# Maintainer: Kenny Glowner <SisyphusAeolides@pm.me>
+# Maintainer: Kenny Glauner <SisyphusAeolides@pm.me>
 pkgname=libinput-rs
 pkgver=0.3.15
 pkgrel=1
