@@ -29,9 +29,9 @@ fingerprint independently before adding or locally trusting the key:
 curl --fail --location --output sisyphus-repo.asc \
   https://raw.githubusercontent.com/SisyphusAeolides/Sisyphus-Repo/main/keys/sisyphus-repo.asc
 gpg --show-keys --with-fingerprint --keyid-format long sisyphus-repo.asc
-# Expected primary fingerprint: 2A02745D8C2C03AE7F95BCEA8136EB9238213447
+# Expected primary fingerprint: A31AA80E123526D235385F4F590D7A398A6D75BB
 sudo pacman-key --add sisyphus-repo.asc
-sudo pacman-key --lsign-key 2A02745D8C2C03AE7F95BCEA8136EB9238213447
+sudo pacman-key --lsign-key A31AA80E123526D235385F4F590D7A398A6D75BB
 sudo pacman -Syy
 sudo pacman -S blerust ccze-rs elan-guardian iwchaos libinput-rs tuned-rs
 ```
