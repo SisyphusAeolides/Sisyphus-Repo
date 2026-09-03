@@ -189,11 +189,11 @@ jobs:
     permissions:
       contents: write
     steps:
-      - name: Checkout published snapshots
+      - name: Checkout the main publication tree
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: gh-pages
-          path: previous-pages
+          ref: main
+          path: previous-main
 
       - name: Download signed snapshot
         uses: actions/download-artifact@37930b1c2abaa49bbe596cd826c3c89aef350131 # v7.0.0
@@ -208,10 +208,10 @@ jobs:
           snapshot="sisyphus-snapshot-${GITHUB_SHA}.sha256"
           test -s "public/x86_64/$snapshot"
           test -s "public/x86_64/$snapshot.sig"
-          test ! -e "previous-pages/snapshots/$GITHUB_SHA"
-          if [ -d previous-pages/snapshots ]; then
+          test ! -e "previous-main/snapshots/$GITHUB_SHA"
+          if [ -d previous-main/snapshots ]; then
             mkdir -p public/snapshots
-            cp -a previous-pages/snapshots/. public/snapshots/
+            cp -a previous-main/snapshots/. public/snapshots/
           fi
           mkdir -p "public/snapshots/$GITHUB_SHA"
           cp -a public/x86_64/. "public/snapshots/$GITHUB_SHA/"
@@ -221,7 +221,8 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./public
-          publish_branch: gh-pages
+          publish_branch: main
+          keep_files: true
           user_name: Sisyphus Aeolides
           user_email: SisyphusAeolides@pm.me
           commit_message: Publish certified Sisyphus pacman repository
