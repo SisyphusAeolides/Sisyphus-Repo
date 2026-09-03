@@ -1,0 +1,70 @@
+name: Build and Publish Pacman Packages
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - '**/PKGBUILD'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Arch Linux environment
+        run: |
+          pacman -Syu --noconfirm base-devel git sudo rsync
+          useradd -m builduser
+          echo "builduser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+          chown -R builduser:builduser .
+          # Ensure rustup works if needed
+          sudo -u builduser rustup default stable || true
+
+      - name: Setup GPG
+        run: |
+          sudo -u builduser bash -c '
+            echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
+            git config --global user.name "Kenny Glauner"
+            git config --global user.email "SisyphusAeolides@pm.me"
+            git config --global commit.gpgsign true
+          '
+
+      - name: Build Packages and Update Repo
+        run: |
+          sudo -u builduser bash -c '
+            set -e
+            changed_pkgbuilds=$(git diff-tree --no-commit-id --name-only -r HEAD | grep "PKGBUILD$" || true)
+            if [ -z "$changed_pkgbuilds" ]; then
+              echo "No PKGBUILD changes detected."
+              exit 0
+            fi
+
+            for pkgbuild in $changed_pkgbuilds; do
+              pkgdir=$(dirname "$pkgbuild")
+              cd "$pkgdir"
+              makepkg -s --noconfirm --sign
+              cd -
+            done
+
+            find . -name "*.pkg.tar.zst*" -not -path "./x86_64/*" -exec mv {} x86_64/ \;
+            cd x86_64
+            repo-add -s -n sisyphus.db.tar.gz *.pkg.tar.zst
+          '
+
+      - name: Commit and Push
+        run: |
+          sudo -u builduser bash -c '
+            git add x86_64/
+            if ! git diff-index --quiet HEAD; then
+              git commit -m "chore: auto-update repository database"
+              git push
+            fi
+          '
