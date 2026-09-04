@@ -31,14 +31,16 @@ jobs:
 
       - name: Setup GPG
         run: |
-          echo "${{ secrets.GPG_PRIVATE_KEY }}" | sudo -u builduser gpg --batch --import
-          sudo -H -u builduser git config --global user.name "Kenny Glauner"
-          sudo -H -u builduser git config --global user.email "SisyphusAeolides@pm.me"
-          sudo -H -u builduser git config --global commit.gpgsign true
-          sudo -H -u builduser git config --global --add safe.directory "*"
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" | sudo -H -u builduser gpg --batch --import
+          echo "${{ secrets.GPG_PRIVATE_KEY }}" | gpg --batch --import
+          git config --global user.name "Kenny Glauner"
+          git config --global user.email "SisyphusAeolides@pm.me"
+          git config --global commit.gpgsign true
+          git config --global --add safe.directory "*"
+
       - name: Build Packages and Update Repo
         run: |
-          sudo -H -u builduser bash -c '
+          sudo -u builduser bash -c '
             set -e
             changed_pkgbuilds=$(git diff-tree --no-commit-id --name-only -r HEAD | grep "PKGBUILD$" || true)
             if [ -z "$changed_pkgbuilds" ]; then
@@ -53,18 +55,16 @@ jobs:
               cd -
             done
 
-            find . -name "*.pkg.tar.zst*" -not -path "./x86_64/*" -exec mv {} x86_64/ \;
+            find . -name "*.pkg.tar.zst*" -not -path "./x86_64/*" -exec mv {} x86_64/ ;
             cd x86_64
             repo-add -s -n sisyphus.db.tar.gz *.pkg.tar.zst
           '
 
       - name: Commit and Push
         run: |
-          sudo -H -u builduser bash -c '
-            git config --global --add safe.directory "$PWD"
-            git add x86_64/
-            if ! git diff-index --quiet HEAD; then
-              git commit -m "chore: auto-update repository database"
-              git push
-            fi
-          '
+          chown -R root:root .
+          git add x86_64/
+          if ! git diff-index --quiet HEAD; then
+            git commit -m "chore: auto-update repository database"
+            git push
+          fi
