@@ -49,7 +49,11 @@ jobs:
         shell: bash
         run: |
           cd "$GITHUB_WORKSPACE"
-          changed_pkgbuilds=$(git -c safe.directory="$GITHUB_WORKSPACE" diff-tree --no-commit-id --name-only -r HEAD -- '*PKGBUILD')
+          if [ "${GITHUB_EVENT_NAME:-push}" = "workflow_dispatch" ]; then
+            changed_pkgbuilds=$(git -c safe.directory="$GITHUB_WORKSPACE" ls-files -- '*PKGBUILD')
+          else
+            changed_pkgbuilds=$(git -c safe.directory="$GITHUB_WORKSPACE" diff-tree --no-commit-id --name-only -r HEAD -- '*PKGBUILD')
+          fi
           if [ -z "$changed_pkgbuilds" ]; then
             echo "No PKGBUILD changes detected."
             exit 0
