@@ -61,6 +61,7 @@ jobs:
       - name: Commit and Push
         run: |
           sudo -H -u builduser bash -c '
+            git config --global --add safe.directory "$PWD"
             git add x86_64/
             if ! git diff-index --quiet HEAD; then
               git commit -m "chore: auto-update repository database"
