@@ -1,1 +1,0 @@
-sisyphus.files.tar.gz.sig

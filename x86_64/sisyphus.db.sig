@@ -1,1 +1,0 @@
-sisyphus.db.tar.gz.sig
