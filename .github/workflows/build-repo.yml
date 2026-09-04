@@ -62,6 +62,10 @@ jobs:
 
       - name: Commit and Push
         run: |
+          chown -R root:root .
+          git config --global --add safe.directory "*"
+          git config --system --add safe.directory "*"
+          export GIT_DISCOVERY_ACROSS_FILESYSTEM=1
           git add x86_64/
           if ! git diff-index --quiet HEAD; then
             git commit -m "chore: auto-update repository database"
