@@ -28,6 +28,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Arch Linux environment
+        shell: bash
         run: |
           pacman -Syu --noconfirm base-devel git gnupg sudo rsync
           useradd --create-home --user-group builduser
@@ -35,12 +36,15 @@ jobs:
           install -d -o builduser -g builduser "$GITHUB_WORKSPACE/x86_64"
 
       - name: Setup GPG
+        shell: bash
         run: |
           echo "${{ secrets.GPG_PRIVATE_KEY }}" | sudo -u builduser gpg --batch --import
 
       - name: Build Packages and Update Repo
+        shell: bash
         run: |
-          changed_pkgbuilds=$(git -c safe.directory="$GITHUB_WORKSPACE" diff-tree --no-commit-id --name-only -r HEAD -- '*PKGBUILD' || true)
+          cd "$GITHUB_WORKSPACE"
+          changed_pkgbuilds=$(git -c safe.directory="$GITHUB_WORKSPACE" diff-tree --no-commit-id --name-only -r HEAD -- '*PKGBUILD')
           if [ -z "$changed_pkgbuilds" ]; then
             echo "No PKGBUILD changes detected."
             exit 0
@@ -69,8 +73,10 @@ jobs:
           ' </dev/null
 
       - name: Commit and Push
+        shell: bash
         run: |
           set -euo pipefail
+          cd "$GITHUB_WORKSPACE"
           git -c safe.directory="$GITHUB_WORKSPACE" add -- x86_64/
           if git -c safe.directory="$GITHUB_WORKSPACE" diff --cached --quiet; then
             echo "Repository database is already current."
