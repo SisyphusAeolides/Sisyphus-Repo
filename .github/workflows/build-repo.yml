@@ -21,6 +21,11 @@ jobs:
     container: archlinux:latest
 
     steps:
+      - name: Install Git for checkout
+        shell: bash
+        run: |
+          pacman -Syu --noconfirm git
+
       - name: Checkout repository
         uses: actions/checkout@v5
         with:
