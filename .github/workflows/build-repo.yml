@@ -73,7 +73,7 @@ jobs:
               pkgdir=$(dirname "$pkgbuild")
               cd "$pkgdir"
               PKGDEST="$GITHUB_WORKSPACE/x86_64" \
-                makepkg --syncdeps --noconfirm --sign
+                makepkg --syncdeps --noconfirm --sign --force
               cd "$GITHUB_WORKSPACE"
             done <<< "$CHANGED_PKGBUILDS"
 
