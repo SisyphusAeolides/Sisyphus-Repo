@@ -38,7 +38,7 @@ jobs:
           git config --system --add safe.directory "*"
       - name: Build Packages and Update Repo
         run: |
-          sudo -u builduser bash -c '
+          sudo -H -u builduser bash -c '
             set -e
             changed_pkgbuilds=$(git diff-tree --no-commit-id --name-only -r HEAD | grep "PKGBUILD$" || true)
             if [ -z "$changed_pkgbuilds" ]; then
@@ -60,7 +60,7 @@ jobs:
 
       - name: Commit and Push
         run: |
-          sudo -u builduser bash -c '
+          sudo -H -u builduser bash -c '
             git add x86_64/
             if ! git diff-index --quiet HEAD; then
               git commit -m "chore: auto-update repository database"
