@@ -32,10 +32,10 @@ jobs:
       - name: Setup GPG
         run: |
           echo "${{ secrets.GPG_PRIVATE_KEY }}" | sudo -u builduser gpg --batch --import
-          sudo -u builduser git config --global user.name "Kenny Glauner"
-          sudo -u builduser git config --global user.email "SisyphusAeolides@pm.me"
-          sudo -u builduser git config --global commit.gpgsign true
-          sudo -u builduser git config --global --add safe.directory "*"
+          git config --system user.name "Kenny Glauner"
+          git config --system user.email "SisyphusAeolides@pm.me"
+          git config --system commit.gpgsign true
+          git config --system --add safe.directory "*"
       - name: Build Packages and Update Repo
         run: |
           sudo -u builduser bash -c '
