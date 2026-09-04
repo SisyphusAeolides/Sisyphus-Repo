@@ -1,6 +1,7 @@
 name: Build and Publish Pacman Packages
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
@@ -10,6 +11,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+  workflow_dispatch:
     container: archlinux:latest
 
     steps:
