@@ -78,7 +78,11 @@ jobs:
             done <<< "$CHANGED_PKGBUILDS"
 
             cd "$GITHUB_WORKSPACE/x86_64"
-            repo-add --sign --new --verify sisyphus.db.tar.gz ./*.pkg.tar.zst
+            # Reindex every archive, including a package rebuilt at the same
+            # version.  --new leaves an older checksum in the database when
+            # makepkg --force replaces an archive, which makes pacman reject
+            # the freshly published file as corrupted.
+            repo-add --sign --verify sisyphus.db.tar.gz ./*.pkg.tar.zst
           ' </dev/null
 
       - name: Commit and Push
