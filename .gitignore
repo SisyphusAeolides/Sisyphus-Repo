@@ -1,3 +1,5 @@
 # makepkg source-cache directories
 */src/
 */pkg/
+__pycache__/
+*.py[cod]
