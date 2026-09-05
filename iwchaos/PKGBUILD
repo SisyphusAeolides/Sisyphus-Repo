@@ -1,7 +1,7 @@
 # Maintainer: Kenny Glauner <SisyphusAeolides@pm.me>
 pkgname=iwchaos
 pkgver=0.2.4
-pkgrel=3
+pkgrel=4
 _commit=b95567d308d644459ecf9f8c2c2493bcfee65a0c
 pkgdesc="Target-kernel Intel Wi-Fi modules with a bounded rate policy"
 arch=('x86_64')

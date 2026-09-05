@@ -1,7 +1,7 @@
 pkgbase = iwchaos
 	pkgdesc = Target-kernel Intel Wi-Fi modules with a bounded rate policy
 	pkgver = 0.2.4
-	pkgrel = 3
+	pkgrel = 4
 	url = https://github.com/SisyphusAeolides/iwchaos
 	arch = x86_64
 	license = GPL-2.0-only
