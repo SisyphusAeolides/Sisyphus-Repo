@@ -1,0 +1,27 @@
+source_commit=49d398e9ac38a45082fbfe890a611714130bdfb8
+workflow_run=33704252059
+workflow_attempt=1
+0388a7ebf243bfcbaf6193d040490720574e6e5b9f2e5df9468e594c67b88bf6  ./blerust-0.1.16-1-x86_64.pkg.tar.zst
+b539de9b8ced03c703e5032b6dc560d34fd4a702a00e020435080cd549006160  ./blerust-debug-0.1.16-1-x86_64.pkg.tar.zst
+59309dda5d6a28b381478654d10b2878f8189c0bfa1fcc1f7666c4d13bba4e51  ./ccze-rs-0.5.4-4-x86_64.pkg.tar.zst
+3ce09839aa6661409a3d803cc2f3d509de45f1408118c72ff06ed9aedbfc6d41  ./ccze-rs-debug-0.5.4-4-x86_64.pkg.tar.zst
+b4f32956bf8596a5155ff098e3d5a44a888abba8737464623238c481018e6d18  ./elan-guardian-0.2.15-6-x86_64.pkg.tar.zst
+d10c831290fc3743d6fd618ad0957ce32238780b0f4d7f0facbb0567c9881022  ./elan-guardian-debug-0.2.15-6-x86_64.pkg.tar.zst
+f267d992a0ac5b70ef29f55891d4867e19cb7ed1acfb5becb023d9a0a116b36f  ./iwchaos-0.2.4-1-x86_64.pkg.tar.zst
+d88ed25468b5ebfa0dca769a9728980c7130538456ecece9f2065a52390d5105  ./libinput-rs-0.3.11-6-x86_64.pkg.tar.zst
+359f08d42e7a7c3d887bbc2e67508df4b2f08731bc8557aa7554035cd3269569  ./libinput-rs-debug-0.3.11-6-x86_64.pkg.tar.zst
+cb99d443cb248b87d48fe9620dc5ab9558e79b258c52d2f932e66685ecbc9e05  ./tuned-rs-0.3.0-1-x86_64.pkg.tar.zst
+0bf7597c41f8220c58d80212768a6edab59bd17959486ba93c13bf4f2dc46eab  ./tuned-rs-debug-0.3.0-1-x86_64.pkg.tar.zst
+0382c8836806440a6d6bcb11f99383090938a6e90e0c0a5e44cffb3da754ec04  ./blerust-0.1.16-1-x86_64.pkg.tar.zst.sig
+d7e6a58b00d585a30fb915204e187f97c10afee1ba282ce303e79f8993afabd4  ./blerust-debug-0.1.16-1-x86_64.pkg.tar.zst.sig
+0240d95b7767c281fb762f95dc04e9a4571343aafc8fb5e1510e980b889028c3  ./ccze-rs-0.5.4-4-x86_64.pkg.tar.zst.sig
+87dba11f2bd44e11c3a123b2fda6514bc71f821a0b9e1629ef73d0ec3c1cab9c  ./ccze-rs-debug-0.5.4-4-x86_64.pkg.tar.zst.sig
+7b1c36c442405917bdc893179c7292ce7ae3c5169ee25cd764872ef03151456d  ./elan-guardian-0.2.15-6-x86_64.pkg.tar.zst.sig
+b42d1eb5f9fb7255875f68519ed98da2a8c80106ef6d08f3a7ae2dac80002785  ./elan-guardian-debug-0.2.15-6-x86_64.pkg.tar.zst.sig
+83986dd7575a714d575a15c7418d78efdcb940d40e869735c0e393138d296f2d  ./iwchaos-0.2.4-1-x86_64.pkg.tar.zst.sig
+05ec4daf73696c9e261c19d93fac10893a65fc1771d1c3e351bd9859b26d4fa6  ./libinput-rs-0.3.11-6-x86_64.pkg.tar.zst.sig
+9af6a997348cacf627ffbbc04112b516fcd2de5ed0a9cb6984972e6984a4200e  ./libinput-rs-debug-0.3.11-6-x86_64.pkg.tar.zst.sig
+ac425ea8f1597c095d68573d6abb5ab087b86428924a037ebdaabd70cfb3bc1e  ./tuned-rs-0.3.0-1-x86_64.pkg.tar.zst.sig
+abebd8d589042064d3033916e83403a1102fb55ba7cf5341ed26b3b165d1c1de  ./tuned-rs-debug-0.3.0-1-x86_64.pkg.tar.zst.sig
+3731ac93d7a232dde9936042c24e74409f9b78cc7a720b60c374f8c830a299b6  sisyphus.db.tar.gz
+12ff84b8be29fd247f333820f63ceba58d08453892b968da3ba12e0228bb1de9  sisyphus.db.tar.gz.sig

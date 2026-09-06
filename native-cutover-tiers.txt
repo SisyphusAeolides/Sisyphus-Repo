@@ -1,0 +1,117 @@
+# Staged consumer rebuild DAG for native RustD cutover.
+# Packages are ordered by dependency foundations. Use with:
+#   python3 scripts/audit-systemd-closure.py --manifest native-cutover-packages.txt
+#   bash scripts/check-consumer-tiers.sh --tier T2
+#   bash scripts/check-consumer-tiers.sh --tier T3 --fail-on-consumers
+#
+# T0 lands with rustd-libs/rustd-devel. Later tiers rebuild against those APIs
+# (or disable optional journal/udev plugins) before systemd-libs can leave.
+
+[T0]
+# Native library providers
+rustd-libs
+rustd-devel
+rustd
+rustd-resolved
+
+[T1]
+# First-party retargets (must not depend on systemd-libs)
+libinput-rs
+tuned-rs
+elan-guardian
+
+[T2]
+# udev foundations
+libusb
+libgudev
+hidapi
+usbutils
+pciutils
+libatasmart
+libei
+ddcutil
+v4l-utils
+
+[T3]
+# IPC / auth (lockstep with rustd deps)
+dbus
+dbus-broker
+pam
+polkit
+accountsservice
+fprintd
+gcr-4
+
+[T4]
+# Storage
+device-mapper
+lvm2
+btrfs-progs
+udisks2
+libblockdev
+thin-provisioning-tools
+ndctl
+smartmontools
+
+[T5]
+# Network / Bluetooth
+libnm
+networkmanager
+modemmanager
+bluez
+bluez-hid2hci
+bluez-obex
+bluez-utils
+openvpn
+avahi
+rpcbind
+rdma-core
+gssproxy
+
+[T6]
+# Audio / video
+pipewire
+pipewire-audio
+wireplumber
+libpulse
+jack2
+fluidsynth
+vlc-plugin-journal
+vlc-plugin-udev
+
+[T7]
+# Qt / Plasma desktop
+qt6-base
+qt6-webengine
+kcoreaddons
+libksysguard
+solid
+kwin
+plasma-workspace
+plasma-desktop
+plasma-login-manager
+powerdevil
+kdeplasma-addons
+kinfocenter
+plymouth
+xdg-desktop-portal
+
+[T8]
+# Leaves / tooling
+procps-ng
+util-linux
+cups
+system-config-printer
+fwupd
+pcsclite
+hwloc
+appstream
+at-spi2-core
+vte3
+pkgfile
+qemu-system-x86
+ananicy-cpp
+dmemcg-booster
+vulkan-intel
+lib32-systemd
+systemd
