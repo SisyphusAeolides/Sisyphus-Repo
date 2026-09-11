@@ -5,9 +5,7 @@ ArachOS and compatible mkosi systems. The build and image path is mkosi;
 there is no Arch or `pacman` dependency in this repository.
 
 The archives and repository index use Arch's package format so mkosi can
-assemble a reproducible live image. On an installed ArachOS system, Corinth is
-the supported package interface; use its search, install, update, and remove
-commands instead of calling a distribution package client directly.
+assemble a reproducible live image. On an installed ArachOS system, `pacman` is the supported package interface.
 
 This repository publishes x86_64 packages for:
 
@@ -42,13 +40,13 @@ sudo pacman -S blerust ccze-rs elan-guardian iwchaos libinput-rs tuned-rs
 ```
 
 The commands above are for preparing an mkosi build host. A running ArachOS
-installation consumes the same signed feed through Corinth:
+installation consumes the same signed feed through `pacman`:
 
 ```sh
-corinth search iwchaos
-corinth install iwchaos
-corinth update iwchaos
-corinth remove iwchaos
+pacman -Ss iwchaos
+sudo pacman -S iwchaos
+sudo pacman -Syu
+sudo pacman -Rs iwchaos
 ```
 
 `SigLevel = Required DatabaseRequired` rejects unsigned packages and unsigned
@@ -79,9 +77,9 @@ Server = https://sisyphusaeolides.github.io/Sisyphus-Repo/arachos/$arch
 
 The same signing key is used. Verify the fingerprint shown above before
 trusting it, then refresh the database with `sudo pacman -Syy`. The feed
-contains the Arach-Kernel, RustD, RustD-resolved, Hermes, Arach-HWD, Corinth,
+contains the Arach-Kernel, RustD, RustD-resolved, Hermes, Arach-HWD,
 Calamares, GRUB, and supporting ArachOS packages used to compose the live
-image. Corinth remains the normal user-facing interface for installing and
+image. `pacman` remains the normal user-facing interface for installing and
 updating them.
 
 A release builder can publish a checked package directory with:
