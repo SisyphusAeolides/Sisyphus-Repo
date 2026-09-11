@@ -2,9 +2,9 @@
 
 This is the signed x86_64 package feed maintained by SisyphusAeolides for
 ArachOS and compatible mkosi systems. The build and image path is mkosi;
-there is no Fedora or `dnf` dependency in this repository.
+there is no Arch or `pacman` dependency in this repository.
 
-The archives and repository index use Fedora's package format so mkosi can
+The archives and repository index use Arch's package format so mkosi can
 assemble a reproducible live image. On an installed ArachOS system, Corinth is
 the supported package interface; use its search, install, update, and remove
 commands instead of calling a distribution package client directly.
@@ -19,7 +19,7 @@ This repository publishes x86_64 packages for:
 - `tuned-rs`
 
 
-Add the repository to `/etc/dnf.conf`:
+Add the repository to `/etc/pacman.conf`:
 
 ```ini
 [sisyphus]
@@ -35,10 +35,10 @@ curl --fail --location --output sisyphus-repo.asc \
   https://raw.githubusercontent.com/SisyphusAeolides/Sisyphus-Repo/main/keys/sisyphus-repo.asc
 gpg --show-keys --with-fingerprint --keyid-format long sisyphus-repo.asc
 # Expected primary fingerprint: A31AA80E123526D235385F4F590D7A398A6D75BB
-sudo dnf-key --add sisyphus-repo.asc
-sudo dnf-key --lsign-key A31AA80E123526D235385F4F590D7A398A6D75BB
-sudo dnf -Syy
-sudo dnf -S blerust ccze-rs elan-guardian iwchaos libinput-rs tuned-rs
+sudo pacman-key --add sisyphus-repo.asc
+sudo pacman-key --lsign-key A31AA80E123526D235385F4F590D7A398A6D75BB
+sudo pacman -Syy
+sudo pacman -S blerust ccze-rs elan-guardian iwchaos libinput-rs tuned-rs
 ```
 
 The commands above are for preparing an mkosi build host. A running ArachOS
@@ -78,7 +78,7 @@ Server = https://sisyphusaeolides.github.io/Sisyphus-Repo/arachos/$arch
 ```
 
 The same signing key is used. Verify the fingerprint shown above before
-trusting it, then refresh the database with `sudo dnf -Syy`. The feed
+trusting it, then refresh the database with `sudo pacman -Syy`. The feed
 contains the Arach-Kernel, RustD, RustD-resolved, Hermes, Arach-HWD, Corinth,
 Calamares, GRUB, and supporting ArachOS packages used to compose the live
 image. Corinth remains the normal user-facing interface for installing and
