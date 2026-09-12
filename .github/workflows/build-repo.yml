@@ -41,9 +41,26 @@ jobs:
           install -d -o builduser -g builduser "$GITHUB_WORKSPACE/x86_64"
 
       - name: Setup GPG
+        id: gpg
         shell: bash
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
         run: |
-          echo "${{ secrets.GPG_PRIVATE_KEY }}" | sudo -u builduser gpg --batch --import
+          set -euo pipefail
+          if [ -z "$GPG_PRIVATE_KEY" ]; then
+            echo "::error::GPG_PRIVATE_KEY is not configured for this repository."
+            exit 1
+          fi
+          printf '%s\n' "$GPG_PRIVATE_KEY" |
+            sudo -u builduser env HOME=/home/builduser gpg --batch --import
+          repo_key=$(sudo -u builduser env HOME=/home/builduser \
+            gpg --batch --with-colons --list-secret-keys |
+            awk -F: '$1 == "fpr" { print $10; exit }')
+          if [ -z "$repo_key" ]; then
+            echo "::error::The configured GPG_PRIVATE_KEY contains no secret signing key."
+            exit 1
+          fi
+          echo "key_id=$repo_key" >> "$GITHUB_OUTPUT"
 
       - name: Build Packages and Update Repo
         shell: bash
@@ -73,16 +90,29 @@ jobs:
               pkgdir=$(dirname "$pkgbuild")
               cd "$pkgdir"
               PKGDEST="$GITHUB_WORKSPACE/x86_64" \
-                makepkg --syncdeps --noconfirm --sign --force
+                makepkg --syncdeps --noconfirm --sign --key "${{ steps.gpg.outputs.key_id }}" --force
               cd "$GITHUB_WORKSPACE"
             done <<< "$CHANGED_PKGBUILDS"
 
             cd "$GITHUB_WORKSPACE/x86_64"
+            # Existing archives may have been signed by a retired key. Keep
+            # the old public key available for consumers, but ensure every
+            # archive in the live repository can be checked with the active
+            # deployment key.
+            for package in ./*.pkg.tar.zst; do
+              [ -f "$package" ] || continue
+              if ! gpg --batch --verify "$package.sig" "$package" >/dev/null 2>&1; then
+                gpg --batch --yes --detach-sign \
+                  --local-user "${{ steps.gpg.outputs.key_id }}" "$package"
+              fi
+            done
+
             # Reindex every archive, including a package rebuilt at the same
             # version.  --new leaves an older checksum in the database when
             # makepkg --force replaces an archive, which makes pacman reject
             # the freshly published file as corrupted.
-            repo-add --sign --verify sisyphus.db.tar.gz ./*.pkg.tar.zst
+            repo-add --sign --key "${{ steps.gpg.outputs.key_id }}" \
+              sisyphus.db.tar.gz ./*.pkg.tar.zst
 
             # Keep the short database names as regular files so simple HTTP
             # hosts such as raw.githubusercontent.com serve their contents.
