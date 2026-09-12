@@ -1,8 +1,8 @@
 # Maintainer: Kenny Glauner <SisyphusAeolides@pm.me>
 pkgname=ccze-rs
 pkgver=0.5.4
-pkgrel=4
-_commit=51cb08d20e33fb8cb45762db293a9405f9c62cbf
+pkgrel=5
+_commit=600618985a2003216ceab2c79d6fe898319f6e39
 pkgdesc="Fast streaming log colorizer with native analytics and formally specified protocol verification"
 arch=('x86_64')
 url="https://github.com/SisyphusAeolides/ccze-rs"
