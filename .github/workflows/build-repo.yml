@@ -39,6 +39,7 @@ jobs:
           useradd --create-home --user-group builduser
           echo "builduser ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
           install -d -o builduser -g builduser "$GITHUB_WORKSPACE/x86_64"
+          chown -R builduser:builduser "$GITHUB_WORKSPACE/x86_64"
 
       - name: Setup GPG
         id: gpg
