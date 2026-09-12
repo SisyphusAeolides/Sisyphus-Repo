@@ -18,6 +18,8 @@ Add the repository to `/etc/pacman.conf`:
 ```ini
 [sisyphus]
 SigLevel = Required DatabaseRequired
+# CDN mirror first; raw GitHub remains the canonical fallback.
+Server = https://cdn.jsdelivr.net/gh/SisyphusAeolides/Sisyphus-Repo@main/$arch
 Server = https://raw.githubusercontent.com/SisyphusAeolides/Sisyphus-Repo/main/$arch
 ```
 
