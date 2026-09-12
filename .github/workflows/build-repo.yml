@@ -78,6 +78,7 @@ jobs:
 
           while IFS= read -r pkgbuild; do
             [ -n "$pkgbuild" ] || continue
+            [ -f "$GITHUB_WORKSPACE/$pkgbuild" ] || continue
             pkgdir=$(dirname "$pkgbuild")
             chown -R builduser:builduser "$GITHUB_WORKSPACE/$pkgdir"
           done <<< "$changed_pkgbuilds"
@@ -87,6 +88,7 @@ jobs:
             set -e
             while IFS= read -r pkgbuild; do
               [ -n "$pkgbuild" ] || continue
+              [ -f "$GITHUB_WORKSPACE/$pkgbuild" ] || continue
               pkgdir=$(dirname "$pkgbuild")
               cd "$pkgdir"
               PKGDEST="$GITHUB_WORKSPACE/x86_64" \
