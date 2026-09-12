@@ -110,10 +110,16 @@ jobs:
               fi
             done
 
-            # Reindex every archive, including a package rebuilt at the same
-            # version.  --new leaves an older checksum in the database when
-            # makepkg --force replaces an archive, which makes pacman reject
-            # the freshly published file as corrupted.
+            # Rebuild the indexes from the current archive set. Starting with
+            # empty databases also drops packages that were removed from the
+            # repository instead of leaving stale records behind.
+            rm -f -- \
+              sisyphus.db sisyphus.db.sig \
+              sisyphus.db.tar.gz sisyphus.db.tar.gz.sig \
+              sisyphus.db.tar.gz.old sisyphus.db.tar.gz.old.sig \
+              sisyphus.files sisyphus.files.sig \
+              sisyphus.files.tar.gz sisyphus.files.tar.gz.sig \
+              sisyphus.files.tar.gz.old sisyphus.files.tar.gz.old.sig
             repo-add --sign --key "${{ steps.gpg.outputs.key_id }}" \
               sisyphus.db.tar.gz ./*.pkg.tar.zst
 

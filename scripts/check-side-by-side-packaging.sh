@@ -193,7 +193,7 @@ grep -Fq 'librustd_service' "$ROOT/rustd/PKGBUILD" \
   || fail "rustd must not force the preview compatibility package"
 pass "rustd-libs/compat/devel split packaging contract"
 
-for dir in libinput-rs tuned-rs elan-guardian; do
+for dir in libinput-rs tuned-rs; do
   pb="$ROOT/$dir/PKGBUILD"
   [[ -f "$pb" ]] || fail "missing $pb"
   ! grep -Eq "systemd-libs" "$pb" \
@@ -203,8 +203,6 @@ grep -Fq 'rustd-libs' "$ROOT/libinput-rs/PKGBUILD" \
   || fail "libinput-rs was not retargeted onto rustd-libs"
 grep -Fq 'rustd-libs' "$ROOT/tuned-rs/PKGBUILD" \
   || fail "tuned-rs was not retargeted onto rustd-libs"
-grep -Fq '/usr/lib/rustd/system' "$ROOT/elan-guardian/PKGBUILD" \
-  || fail "elan-guardian units were not moved onto /usr/lib/rustd/system"
 pass "first-party packages retargeted off systemd-libs"
 
 [[ -f "$ROOT/native-cutover-tiers.txt" ]] \

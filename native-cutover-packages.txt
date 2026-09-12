@@ -18,7 +18,6 @@ dbus-broker
 ddcutil
 device-mapper
 dmemcg-booster
-elan-guardian
 fluidsynth
 fprintd
 fwupd

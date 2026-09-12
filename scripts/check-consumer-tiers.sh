@@ -70,7 +70,7 @@ case "$tier" in
     echo "PASS: T0 rustd-libs/compat/devel packaging contract"
     ;;
   T1)
-    for dir in libinput-rs tuned-rs elan-guardian; do
+    for dir in libinput-rs tuned-rs; do
       pb="$ROOT/$dir/PKGBUILD"
       [[ -f "$pb" ]] || { echo "missing $pb" >&2; exit 1; }
       ! grep -Eq "systemd-libs" "$pb" \

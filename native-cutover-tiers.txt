@@ -18,7 +18,6 @@ rustd-resolved
 # First-party retargets (must not depend on systemd-libs)
 libinput-rs
 tuned-rs
-elan-guardian
 
 [T2]
 # udev foundations
