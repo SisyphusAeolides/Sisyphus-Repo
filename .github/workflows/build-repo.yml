@@ -83,6 +83,13 @@ jobs:
             # makepkg --force replaces an archive, which makes pacman reject
             # the freshly published file as corrupted.
             repo-add --sign --verify sisyphus.db.tar.gz ./*.pkg.tar.zst
+
+            # Keep the short database names as regular files so simple HTTP
+            # hosts such as raw.githubusercontent.com serve their contents.
+            cp --remove-destination sisyphus.db.tar.gz sisyphus.db
+            cp --remove-destination sisyphus.db.tar.gz.sig sisyphus.db.sig
+            cp --remove-destination sisyphus.files.tar.gz sisyphus.files
+            cp --remove-destination sisyphus.files.tar.gz.sig sisyphus.files.sig
           ' </dev/null
 
       - name: Commit and Push
