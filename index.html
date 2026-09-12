@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Sisyphus signed Arch Linux package repository">
+  <title>Sisyphus Package Repository</title>
+  <style>
+    :root { color-scheme: dark; font-family: system-ui, sans-serif; }
+    body { max-width: 52rem; margin: 0 auto; padding: 3rem 1.25rem; line-height: 1.6; background: #101418; color: #e7edf3; }
+    a { color: #72b7ff; }
+    code, pre { font-family: "JetBrains Mono", monospace; }
+    pre { overflow-x: auto; padding: 1rem; border: 1px solid #33404d; border-radius: .5rem; background: #171d24; }
+    .links { display: flex; flex-wrap: wrap; gap: 1rem; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Sisyphus Package Repository</h1>
+    <p>A signed Arch Linux x86_64 package repository maintained by SisyphusAeolides.</p>
+
+    <h2>Use with pacman</h2>
+    <p>Add this repository to <code>/etc/pacman.conf</code>:</p>
+    <pre><code>[sisyphus]
+SigLevel = Required DatabaseRequired
+Server = https://cdn.jsdelivr.net/gh/SisyphusAeolides/Sisyphus-Repo@main/$arch
+Server = https://raw.githubusercontent.com/SisyphusAeolides/Sisyphus-Repo/main/$arch</code></pre>
+
+    <p>Install the signing key, refresh the databases, and install packages:</p>
+    <pre><code>sudo pacman-key --add keys/sisyphus-repo-2026.asc
+sudo pacman-key --lsign-key BB4B20152E487BEC32051E1C1466A088F999E0C8
+sudo pacman -Syy
+sudo pacman -S iwchaos blerust ccze-rs libinput-rs tuned-rs</code></pre>
+
+    <p class="links">
+      <a href="README.md">Repository README</a>
+      <a href="keys/sisyphus-repo-2026.asc">Repository key</a>
+      <a href="x86_64/sisyphus.db">Package database</a>
+      <a href="https://github.com/SisyphusAeolides/Sisyphus-Repo">GitHub source</a>
+    </p>
+  </main>
+</body>
+</html>
